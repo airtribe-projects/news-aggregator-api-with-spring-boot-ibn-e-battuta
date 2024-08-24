@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -275,10 +274,5 @@ public class NewsApiService {
                 .from(from)
                 .to(to)
                 .build();
-    }
-
-    @CacheEvict(value = { "topHeadlines", "search", "everything" }, allEntries = true)
-    public void refreshCache() {
-        log.info("Refreshing news cache");
     }
 }

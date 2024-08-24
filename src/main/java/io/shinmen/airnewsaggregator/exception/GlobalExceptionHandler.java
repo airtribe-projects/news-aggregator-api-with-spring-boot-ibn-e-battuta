@@ -19,12 +19,12 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
-@ControllerAdvice
 @Slf4j
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(NewsAggregatorException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(NewsAggregatorException ex) {
+    @ExceptionHandler(AirNewsException.class)
+    public ResponseEntity<ErrorResponse> handleAirNewsExceptions(AirNewsException ex) {
         log.error("Exception occurred: {}", ex.getMessage(), ex);
 
         HttpStatus status = getResponseStatus(ex);

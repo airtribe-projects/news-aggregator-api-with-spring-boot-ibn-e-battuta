@@ -52,15 +52,15 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<MessageResponse> confirmUserAccount(@RequestParam("token") String token) {
+    public ResponseEntity<MessageResponse> confirmUserAccount(@RequestParam String token) {
         authService.verifyUser(token);
         return ResponseEntity.ok(new MessageResponse("User successfully verified"));
     }
 
     @PostMapping("/re-verify")
     public ResponseEntity<MessageResponse> resendVerificationToken(
-            @RequestParam("email") @Email(message = "Email should be valid") String email) {
+            @RequestParam @Email(message = "Email should be valid") String email) {
         authService.reVerifyUser(email);
-        return ResponseEntity.ok(new MessageResponse("User successfully verified"));
+        return ResponseEntity.ok(new MessageResponse("Verification email successfully sent"));
     }
 }

@@ -67,34 +67,34 @@ public class NewsController {
 
     @PostMapping("/read")
     public ResponseEntity<MessageResponse> markAsRead(@AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody NewsArticleRequest request) {
+            @Valid @RequestBody NewsArticleRequest request) {
         newsArticleService.markArticleStatus(userDetails.getUsername(), request.getUrl(), request.getTitle(),
                 request.getAuthor(), request.getSource(),
                 request.getPublishedAt(), "read");
-        return ResponseEntity.ok(new MessageResponse("Article mark as read"));
+        return ResponseEntity.ok(new MessageResponse("Article marked as read"));
     }
 
     @PostMapping("/favorite")
     public ResponseEntity<MessageResponse> markAsFavorite(@AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody NewsArticleRequest request) {
+            @Valid @RequestBody NewsArticleRequest request) {
         newsArticleService.markArticleStatus(userDetails.getUsername(), request.getUrl(), request.getTitle(),
                 request.getAuthor(), request.getSource(),
                 request.getPublishedAt(), "favorite");
         return ResponseEntity.ok(new MessageResponse("Article marked as favorite"));
     }
 
-    @PostMapping("/un-read/{articleId}")
+    @PostMapping("/unread/{articleId}")
     public ResponseEntity<MessageResponse> markAsUnRead(@AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PathVariable("articleId") Long articleId) {
+            @PathVariable Long articleId) {
         newsArticleService.unMarkArticleStatus(userDetails.getUsername(), articleId, "read");
-        return ResponseEntity.ok(new MessageResponse("Article mark as un-read"));
+        return ResponseEntity.ok(new MessageResponse("Article marked as unread"));
     }
 
-    @PostMapping("/un-favorite/{articleId}")
+    @PostMapping("/unfavorite/{articleId}")
     public ResponseEntity<MessageResponse> markAsUnFavorite(@AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PathVariable("articleId") Long articleId) {
+            @PathVariable Long articleId) {
         newsArticleService.unMarkArticleStatus(userDetails.getUsername(), articleId, "favorite");
-        return ResponseEntity.ok(new MessageResponse("Article marked as un-favorite"));
+        return ResponseEntity.ok(new MessageResponse("Article marked as unfavorite"));
     }
 
     @GetMapping("/read")

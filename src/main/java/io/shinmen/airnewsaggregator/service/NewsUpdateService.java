@@ -1,11 +1,9 @@
 package io.shinmen.airnewsaggregator.service;
 
-import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.shinmen.airnewsaggregator.model.enums.Country;
 import io.shinmen.airnewsaggregator.payload.request.TopHeadLinesSearchRequest;
 import lombok.RequiredArgsConstructor;
@@ -16,14 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NewsUpdateService {
 
+    private final CacheService cacheService;
     private final NewsApiService newsApiService;
-    private final CacheManager cacheManager;
 
-    @Scheduled(fixedRate = 900000) // Run every 15 minutes
+    @Scheduled(fixedRate = 900000)
     public void updateCachedNews() throws JsonProcessingException {
-        log.info("Starting scheduled update of cached news");
+        log.info("Starting scheduled update and cleanup of cached news");
 
-        cacheManager.getCache("topHeadlines").clear();
+        cacheService.cleanUpCache();
 
         TopHeadLinesSearchRequest request = TopHeadLinesSearchRequest.builder()
                 .country(Country.US.toValue())
@@ -34,6 +32,6 @@ public class NewsUpdateService {
 
         newsApiService.getTopHeadlines(request);
 
-        log.info("Completed scheduled update of cached news");
+        log.info("Completed scheduled update and cleanup of cached news");
     }
 }

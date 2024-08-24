@@ -11,11 +11,11 @@ import io.shinmen.airnewsaggregator.model.NewsArticle;
 
 @Repository
 public interface NewsArticleRepository extends JpaRepository<NewsArticle, Long> {
-    Optional<NewsArticle> findByUserAndArticleUrl(User user, String articleId);
+    Optional<NewsArticle> findByUserAndArticleUrl(User user, String articleUrl);
 
     List<NewsArticle> findByUserAndIsRead(User user, boolean isRead);
 
     List<NewsArticle> findByUserAndIsFavorite(User user, boolean isFavorite);
 
-    Optional<NewsArticle> findByUserAndId(User user, Long articleId);
+    Optional<NewsArticle> findByUserAndId(User user, Long id);
 }
