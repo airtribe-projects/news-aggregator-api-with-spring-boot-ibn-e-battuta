@@ -1,10 +1,10 @@
 package io.shinmen.airnewsaggregator.payload.request;
 
+import java.time.ZonedDateTime;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -16,7 +16,7 @@ public class NewsArticleRequest {
     @NotBlank
     private String source;
     @NotBlank
-    private Date publishedAt;
+    private ZonedDateTime publishedAt;
     @NotBlank
     private String author;
 }

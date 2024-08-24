@@ -31,7 +31,7 @@ public class CacheController {
     @DeleteMapping("/{cacheName}")
     public ResponseEntity<MessageResponse> clearCache(@PathVariable String cacheName) {
         cacheService.clearCache(cacheName);
-        return ResponseEntity.ok(new MessageResponse("Cache cleared successfully"));
+        return ResponseEntity.ok(MessageResponse.builder().message("Cache cleared successfully").build());
     }
 
     @GetMapping("/{cacheName}")

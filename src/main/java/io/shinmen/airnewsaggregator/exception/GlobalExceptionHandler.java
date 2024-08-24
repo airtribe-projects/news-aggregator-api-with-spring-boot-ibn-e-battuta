@@ -1,6 +1,7 @@
 package io.shinmen.airnewsaggregator.exception;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -38,7 +39,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(status)
                 .message("Error: " + error)
-                .timestamp(LocalDateTime.now())
+                .timestamp(ZonedDateTime.now())
                 .build();
 
         return ResponseEntity.status(status).body(errorResponse);
@@ -46,16 +47,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .toList();
+        List<String> errors = new ArrayList<>();
+
+        errors.addAll(ex.getBindingResult().getFieldErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage).toList());
+
+        errors.addAll(ex.getBindingResult().getGlobalErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage).toList());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .message("VALIDATION ERROR")
-                .timestamp(LocalDateTime.now())
+                .timestamp(ZonedDateTime.now())
                 .details(errors)
                 .build();
 
@@ -69,7 +72,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .message("VALIDATION ERROR")
-                .timestamp(LocalDateTime.now())
+                .timestamp(ZonedDateTime.now())
                 .details(errors)
                 .build();
 
@@ -81,7 +84,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED)
                 .message("Invalid username or password")
-                .timestamp(LocalDateTime.now())
+                .timestamp(ZonedDateTime.now())
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
@@ -92,7 +95,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.FORBIDDEN)
                 .message("Access denied")
-                .timestamp(LocalDateTime.now())
+                .timestamp(ZonedDateTime.now())
                 .build();
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
@@ -103,7 +106,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED)
                 .message("Authentication failed")
-                .timestamp(LocalDateTime.now())
+                .timestamp(ZonedDateTime.now())
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
@@ -116,7 +119,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("An unexpected error occurred")
-                .timestamp(LocalDateTime.now())
+                .timestamp(ZonedDateTime.now())
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

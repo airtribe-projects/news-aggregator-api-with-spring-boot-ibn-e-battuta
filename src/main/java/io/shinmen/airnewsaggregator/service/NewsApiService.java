@@ -1,12 +1,7 @@
 package io.shinmen.airnewsaggregator.service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -16,21 +11,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.shinmen.airnewsaggregator.exception.UserNotFoundException;
-import io.shinmen.airnewsaggregator.model.NewsPreference;
-import io.shinmen.airnewsaggregator.model.User;
-import io.shinmen.airnewsaggregator.model.enums.Category;
-import io.shinmen.airnewsaggregator.model.enums.Country;
-import io.shinmen.airnewsaggregator.payload.request.EverythingQueryRequest;
 import io.shinmen.airnewsaggregator.payload.request.EverythingSearchRequest;
-import io.shinmen.airnewsaggregator.payload.request.TopHeadLinesQueryRequest;
 import io.shinmen.airnewsaggregator.payload.request.TopHeadLinesSearchRequest;
 import io.shinmen.airnewsaggregator.payload.response.NewsArticlesResponse;
-import io.shinmen.airnewsaggregator.payload.response.NewsResponse;
+import io.shinmen.airnewsaggregator.payload.response.NewsArticlesResponse.NewsArticlesResponseBuilder;
 import io.shinmen.airnewsaggregator.payload.response.newsapi.NewsApiArticleResponse;
 import io.shinmen.airnewsaggregator.payload.response.newsapi.NewsApiResponse;
-import io.shinmen.airnewsaggregator.repository.NewsPreferenceRepository;
-import io.shinmen.airnewsaggregator.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,11 +31,8 @@ public class NewsApiService {
     @Value("${news-api.url}")
     private String newsApiUrl;
 
-    private final NewsPreferenceRepository newsPreferenceRepository;
-    private final UserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final ModelMapper modelMapper;
 
     private static final String QUERY = "q";
     private static final String SOURCES = "sources";
@@ -67,8 +50,10 @@ public class NewsApiService {
     private static final String API_KEY = "apiKey";
 
     @Cacheable(value = "topHeadlines", key = "#request.toCacheKey()")
-    public NewsResponse getTopHeadlines(TopHeadLinesSearchRequest request)
+    public List<NewsArticlesResponse> getTopHeadlines(TopHeadLinesSearchRequest request)
             throws JsonProcessingException {
+
+        log.info("Top headlines cache key: {}", request.toCacheKey());
 
         String topHeadlinesUrl = buildTopHeadlinesUrl(request.getQuery(),
                 request.getCountry(),
@@ -78,26 +63,35 @@ public class NewsApiService {
 
         log.info("Fetch top-headlines for the URL: {}", topHeadlinesUrl);
 
-        return new NewsResponse(getNewsResponses(topHeadlinesUrl));
+        return getNewsResponses(topHeadlinesUrl);
     }
 
     @Cacheable(value = "search", key = "#query + '-' + #page + '-' + #pageSize")
-    public NewsResponse search(String query, int page, int pageSize)
+    public List<NewsArticlesResponse> search(String query, int page, int pageSize)
             throws JsonProcessingException {
 
-        String url = buildUrlForSearch(query, page, pageSize);
-        return new NewsResponse(getNewsResponses(url));
+        log.info("Search news cache key: {}", query + "-" + page + "-" + pageSize);
+
+        String searchUrl = buildUrlForSearch(query, page, pageSize);
+
+        log.info("Fetch news for the URL: {}", searchUrl);
+
+        return getNewsResponses(searchUrl);
     }
 
     @Cacheable(value = "everything", key = "#request.toCacheKey()")
-    public NewsResponse getEverything(EverythingSearchRequest request)
+    public List<NewsArticlesResponse> getEverything(EverythingSearchRequest request)
             throws JsonProcessingException {
+
+        log.info("Everything news cache key: {}", request.toCacheKey());
 
         String everythingUrl = buildEverythingUrl(request.getQuery(), request.getSources(),
                 request.getDomains(), request.getFrom(), request.getTo(), request.getLanguage(),
                 request.getSortBy(), request.getPageSize(), request.getPage());
 
-        return new NewsResponse(getNewsResponses(everythingUrl));
+        log.info("Everything news for the URL: {}", everythingUrl);
+
+        return getNewsResponses(everythingUrl);
     }
 
     private String buildTopHeadlinesUrl(String query, String country, String category, String sources, String page,
@@ -148,131 +142,22 @@ public class NewsApiService {
     }
 
     private NewsArticlesResponse convertToNewsResponse(NewsApiArticleResponse newsApiArticleResponse) {
-        NewsArticlesResponse newsArticlesResponse = modelMapper.map(newsApiArticleResponse,
-                NewsArticlesResponse.class);
+        NewsArticlesResponseBuilder newsArticlesResponseBuilder = NewsArticlesResponse.builder()
+                .author(newsApiArticleResponse.getAuthor())
+                .title(newsApiArticleResponse.getTitle())
+                .url(newsApiArticleResponse.getUrl())
+                .publishedAt(newsApiArticleResponse.getPublishedAt());
 
         if (newsApiArticleResponse.getSource() != null) {
-            newsArticlesResponse.setSource(newsApiArticleResponse.getSource().getName());
+            newsArticlesResponseBuilder.source(newsApiArticleResponse.getSource().getName());
         }
 
-        return newsArticlesResponse;
+        return newsArticlesResponseBuilder.build();
     }
 
     private List<NewsArticlesResponse> getNewsResponses(String url) throws JsonProcessingException {
         String newsApiResponseString = restTemplate.getForObject(url, String.class);
         NewsApiResponse newsApiResponse = objectMapper.readValue(newsApiResponseString, NewsApiResponse.class);
         return newsApiResponse.getArticles().stream().map(this::convertToNewsResponse).toList();
-    }
-
-    public TopHeadLinesSearchRequest getTopHeadLinesRequest(TopHeadLinesQueryRequest topHeadlinesQueryRequest,
-            String userName) {
-
-        User user = userRepository.findByUsername(userName)
-                .orElseThrow(() -> new UserNotFoundException("User with username: " + userName + " not found"));
-
-        NewsPreference userNewsPreference = newsPreferenceRepository.findByUser(user).orElse(new NewsPreference());
-
-        String query = topHeadlinesQueryRequest.getQuery() != null
-                ? topHeadlinesQueryRequest.getQuery().replace(" ", "-")
-                : "";
-
-        String country;
-        if (topHeadlinesQueryRequest.getCountry() != null) {
-            country = topHeadlinesQueryRequest.getCountry().toValue();
-        } else {
-            country = Country.US.toValue();
-        }
-
-        String category;
-        if (topHeadlinesQueryRequest.getCategory() != null) {
-            category = topHeadlinesQueryRequest.getCategory().toValue();
-        } else if (query.isEmpty()) {
-            category = "";
-        } else {
-            List<Category> userCategories = new ArrayList<>(userNewsPreference.getCategories());
-            category = !userCategories.isEmpty()
-                    ? userCategories.get(ThreadLocalRandom.current().nextInt(userCategories.size()))
-                            .toValue()
-                    : "";
-        }
-
-        String userSources = userNewsPreference.getSources() != null
-                ? String.join(",", userNewsPreference.getSources())
-                : "";
-
-        String headlineSources = topHeadlinesQueryRequest.getSources() != null
-                ? topHeadlinesQueryRequest.getSources()
-                : "";
-
-        String sources = Stream.of(userSources, headlineSources)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.joining(","));
-
-        String page = String.valueOf(topHeadlinesQueryRequest.getPage());
-        String pageSize = String.valueOf(topHeadlinesQueryRequest.getPageSize());
-
-        Boolean useSources = topHeadlinesQueryRequest.getUseSources();
-
-        return TopHeadLinesSearchRequest.builder()
-                .query(query)
-                .country(country)
-                .category(category)
-                .sources(sources)
-                .page(page)
-                .pageSize(pageSize)
-                .useSources(useSources)
-                .build();
-    }
-
-    public EverythingSearchRequest getEverythingRequest(EverythingQueryRequest everythingQueryRequest,
-            String userName) {
-
-        User user = userRepository.findByUsername(userName)
-                .orElseThrow(() -> new UserNotFoundException("User with username: " + userName + " not found"));
-
-        NewsPreference userNewsPreference = newsPreferenceRepository.findByUser(user).orElse(new NewsPreference());
-
-        String query = everythingQueryRequest.getQuery() != null
-                ? everythingQueryRequest.getQuery().replace(" ", "-")
-                : "";
-
-        String userSources = userNewsPreference.getSources() != null
-                ? String.join(",", userNewsPreference.getSources())
-                : "";
-
-        String headlineSources = everythingQueryRequest.getSources() != null
-                ? everythingQueryRequest.getSources()
-                : "";
-
-        String sources = Stream.of(userSources, headlineSources)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.joining(","));
-
-        String page = String.valueOf(everythingQueryRequest.getPage());
-        String pageSize = String.valueOf(everythingQueryRequest.getPageSize());
-
-        String domains = everythingQueryRequest.getDomains();
-
-        String from = everythingQueryRequest.getFrom() != null ? everythingQueryRequest.getFrom().toString()
-                : "";
-        String to = everythingQueryRequest.getTo() != null ? everythingQueryRequest.getTo().toString() : "";
-
-        String language = everythingQueryRequest.getLanguage() != null
-                ? everythingQueryRequest.getLanguage().toValue()
-                : "";
-
-        String sortBy = everythingQueryRequest.getSortBy();
-
-        return EverythingSearchRequest.builder()
-                .query(query)
-                .domains(domains)
-                .sources(sources)
-                .language(language)
-                .sortBy(sortBy)
-                .page(page)
-                .pageSize(pageSize)
-                .from(from)
-                .to(to)
-                .build();
     }
 }

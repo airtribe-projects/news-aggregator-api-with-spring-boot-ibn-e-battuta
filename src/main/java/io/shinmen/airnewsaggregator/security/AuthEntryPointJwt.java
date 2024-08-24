@@ -1,7 +1,7 @@
 package io.shinmen.airnewsaggregator.security;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 
 import org.springframework.http.HttpStatus;
@@ -38,7 +38,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED)
                 .message("Unauthorized")
-                .timestamp(LocalDateTime.now())
+                .timestamp(ZonedDateTime.now())
                 .details(Collections.singletonList(authException.getMessage()))
                 .build();
 

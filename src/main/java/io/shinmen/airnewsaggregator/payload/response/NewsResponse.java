@@ -4,16 +4,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NewsResponse {
-    private final int total;
-    private final List<NewsArticlesResponse> articles;
-
-    public NewsResponse(List<NewsArticlesResponse> articles) {
-        this.articles = articles;
-        this.total = articles.size();
-    }
+    private int total;
+    private List<NewsArticlesResponse> articles;
 }

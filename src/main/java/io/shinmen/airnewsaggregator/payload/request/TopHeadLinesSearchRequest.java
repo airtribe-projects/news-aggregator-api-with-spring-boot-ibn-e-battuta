@@ -6,11 +6,9 @@ import java.util.stream.Stream;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Builder
 @Getter
-@Setter
 public class TopHeadLinesSearchRequest {
     private String query;
     private String page;

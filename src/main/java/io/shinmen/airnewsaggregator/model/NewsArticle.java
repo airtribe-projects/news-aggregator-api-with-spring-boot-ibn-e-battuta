@@ -1,9 +1,20 @@
 package io.shinmen.airnewsaggregator.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.ZonedDateTime;
 
-import java.util.Date;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "news_articles")
@@ -22,24 +33,22 @@ public class NewsArticle {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "article_url", nullable = false)
-    private String articleUrl;
+    @Column(nullable = false)
+    private String url;
 
-    @Column(name = "article_title", nullable = false)
-    private String articleTitle;
+    @Column(nullable = false)
+    private String title;
 
-    @Column(name = "article_author")
-    private String articleAuthor;
+    @Column(nullable = false)
+    private String author;
 
-    @Column(name = "article_source")
-    private String articleSource;
+    @Column(nullable = false)
+    private String source;
 
-    @Column(name = "article_published_date")
-    private Date articlePublishedDate;
+    @Column(nullable = false)
+    private ZonedDateTime publishedAt;
 
-    @Column(name = "is_read")
     private boolean isRead;
 
-    @Column(name = "is_favorite")
     private boolean isFavorite;
 }

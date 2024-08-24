@@ -2,15 +2,14 @@ package io.shinmen.airnewsaggregator.payload.response.newsapi;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NewsApiResponse {
     private String status;
     private int totalResults;

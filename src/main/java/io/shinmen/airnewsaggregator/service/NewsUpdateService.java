@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.shinmen.airnewsaggregator.model.enums.Country;
 import io.shinmen.airnewsaggregator.payload.request.TopHeadLinesSearchRequest;
 import lombok.RequiredArgsConstructor;

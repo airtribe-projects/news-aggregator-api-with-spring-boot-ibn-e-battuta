@@ -26,7 +26,7 @@ public class CacheService {
 
         return cacheManager.getCacheNames().stream()
                 .map(cacheName -> {
-                    var cache = cacheManager.getCache(cacheName);
+                    org.springframework.cache.Cache cache = cacheManager.getCache(cacheName);
                     if (cache == null) {
                         throw new CacheNotFoundException(cacheName);
                     }
@@ -34,7 +34,8 @@ public class CacheService {
                     try {
                         Cache<?, ?> nativeCache = (Cache<?, ?>) cache.getNativeCache();
                         Map<?, ?> cacheData = nativeCache.asMap();
-                        return new CacheResponse(cacheName, nativeCache.estimatedSize(), cacheData);
+                        return CacheResponse.builder().cacheName(cacheName).size(nativeCache.estimatedSize())
+                                .data(cacheData).build();
 
                     } catch (ClassCastException e) {
                         throw new InvalidCacheTypeException(cacheName);
@@ -48,7 +49,7 @@ public class CacheService {
             throw new CacheNotFoundException(cacheName);
         }
 
-        var cache = cacheManager.getCache(cacheName);
+        org.springframework.cache.Cache cache = cacheManager.getCache(cacheName);
         if (cache == null) {
             throw new CacheNotFoundException(cacheName);
         }
@@ -61,7 +62,7 @@ public class CacheService {
             throw new CacheNotFoundException(cacheName);
         }
 
-        var cache = cacheManager.getCache(cacheName);
+        org.springframework.cache.Cache cache = cacheManager.getCache(cacheName);
         if (cache == null) {
             throw new CacheNotFoundException(cacheName);
         }
@@ -72,12 +73,13 @@ public class CacheService {
             if (key != null) {
                 Object value = Optional.ofNullable(cache.get(key, Object.class))
                         .orElseThrow(() -> new KeyNotFoundException(key, cacheName));
-                return new CacheResponse(cacheName, 1, Map.of(key, value));
+                return CacheResponse.builder().cacheName(cacheName).size(1).data(Map.of(key, value)).build();
             }
 
             // Return the entire cache data
             Map<?, ?> cacheData = nativeCache.asMap();
-            return new CacheResponse(cacheName, nativeCache.estimatedSize(), cacheData);
+            return CacheResponse.builder().cacheName(cacheName).size(nativeCache.estimatedSize()).data(cacheData)
+                    .build();
 
         } catch (ClassCastException e) {
             throw new InvalidCacheTypeException(cacheName);

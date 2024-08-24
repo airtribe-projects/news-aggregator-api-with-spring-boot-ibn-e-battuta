@@ -3,8 +3,11 @@ package io.shinmen.airnewsaggregator.model.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public enum Language {
-    AR, DE, EN, ES, FR, HE, IT, NL, NO, PT, RU, SV, UD, ZH;
+    AR, DE, EN, ES, FR, HE, IT, NL, NO, PT, RU, SV, UD, ZH, UNKNOWN;
 
     @JsonValue
     public String toValue() {
@@ -13,6 +16,11 @@ public enum Language {
 
     @JsonCreator
     public static Language fromValue(String value) {
-        return Language.valueOf(value.toUpperCase());
+        try {
+            return Language.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.error("Illegal language value, {}", value, e);
+            return UNKNOWN;
+        }
     }
 }

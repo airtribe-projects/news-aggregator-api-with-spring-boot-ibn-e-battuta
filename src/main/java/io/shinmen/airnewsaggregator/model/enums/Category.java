@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public enum Category {
-    BUSINESS, ENTERTAINMENT, GENERAL, HEALTH, SCIENCE, SPORTS, TECHNOLOGY;
+    BUSINESS, ENTERTAINMENT, GENERAL, HEALTH, SCIENCE, SPORTS, TECHNOLOGY, UNKNOWN;
 
     @JsonValue
     public String toValue() {
@@ -20,7 +20,7 @@ public enum Category {
             return Category.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
             log.error("Illegal category value, {}", value, e);
-            return null; // Return null for invalid values
+            return UNKNOWN;
         }
     }
 }

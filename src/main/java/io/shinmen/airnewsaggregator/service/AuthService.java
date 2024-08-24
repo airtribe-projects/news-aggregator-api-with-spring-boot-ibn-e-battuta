@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.shinmen.airnewsaggregator.exception.RoleNotFoundException;
 import io.shinmen.airnewsaggregator.exception.UserAlreadyExistsException;
 import io.shinmen.airnewsaggregator.exception.UserAlreadyVerifiedException;
 import io.shinmen.airnewsaggregator.exception.UserNotFoundException;
@@ -19,9 +20,12 @@ import io.shinmen.airnewsaggregator.exception.UserUnverifiedException;
 import io.shinmen.airnewsaggregator.exception.VerificationTokenExpiredException;
 import io.shinmen.airnewsaggregator.exception.VerificationTokenNotFoundException;
 import io.shinmen.airnewsaggregator.model.RefreshToken;
+import io.shinmen.airnewsaggregator.model.Role;
 import io.shinmen.airnewsaggregator.model.User;
 import io.shinmen.airnewsaggregator.model.VerificationToken;
+import io.shinmen.airnewsaggregator.model.enums.UserRole;
 import io.shinmen.airnewsaggregator.payload.response.LoginResponse;
+import io.shinmen.airnewsaggregator.repository.RoleRepository;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
 import io.shinmen.airnewsaggregator.repository.VerificationTokenRepository;
 import io.shinmen.airnewsaggregator.security.JwtUtils;
@@ -37,6 +41,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
 
@@ -57,7 +62,13 @@ public class AuthService {
         User newUser = User.builder()
                 .username(username)
                 .password(passwordEncoder.encode(password))
-                .email(email).build();
+                .email(email)
+                .build();
+
+        Role userRole = roleRepository.findByName(UserRole.ROLE_USER)
+                .orElseThrow(() -> new RoleNotFoundException("Role " + UserRole.ROLE_USER + " was not found"));
+
+        newUser.getRoles().add(userRole);
 
         userRepository.save(newUser);
 

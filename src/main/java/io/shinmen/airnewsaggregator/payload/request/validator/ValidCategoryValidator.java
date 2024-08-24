@@ -1,35 +1,17 @@
 package io.shinmen.airnewsaggregator.payload.request.validator;
 
-import java.util.Set;
-
 import io.shinmen.airnewsaggregator.model.enums.Category;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class ValidCategoryValidator implements ConstraintValidator<ValidCategory, Set<Category>> {
+public class ValidCategoryValidator implements ConstraintValidator<ValidCategory, Category> {
 
     @Override
-    public boolean isValid(Set<Category> categories, ConstraintValidatorContext context) {
-        if (categories == null || categories.isEmpty()) {
+    public boolean isValid(Category category, ConstraintValidatorContext context) {
+        if (category == null) {
             return true;
         }
-        
-        for (Category category : categories) {
-            if (category == null || !isValidCategory(category)) {
-                return false;
-            }
-        }
 
-        return true;
-    }
-
-    private boolean isValidCategory(Category category) {
-        return category == Category.BUSINESS
-            || category == Category.ENTERTAINMENT
-            || category == Category.GENERAL
-            || category == Category.HEALTH
-            || category == Category.SCIENCE
-            || category == Category.SPORTS
-            || category == Category.TECHNOLOGY;
+        return category != Category.UNKNOWN;
     }
 }

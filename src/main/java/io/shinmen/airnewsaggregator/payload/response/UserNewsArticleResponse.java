@@ -1,22 +1,16 @@
 package io.shinmen.airnewsaggregator.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
-import lombok.Setter;
 
+import lombok.Builder;
+import lombok.Getter;
 import java.util.List;
 
 @Getter
-@Setter
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserNewsArticleResponse {
     private UserResponse user;
-    private List<NewsArticlesResponse> articles;
+    private List<NewsArticlesResponse> newsArticles;
     private int total;
-
-    public UserNewsArticleResponse(UserResponse user, List<NewsArticlesResponse> articles) {
-        this.user = user;
-        this.articles = articles;
-        this.total = articles.size();
-    }
 }

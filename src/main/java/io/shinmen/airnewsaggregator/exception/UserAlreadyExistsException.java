@@ -9,4 +9,3 @@ public class UserAlreadyExistsException extends AirNewsException {
         super(message);
     }
 }
-

@@ -35,7 +35,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<MessageResponse> register(@Valid @RequestBody SignupRequest signUpRequest) {
         authService.registerUser(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPassword());
-        return ResponseEntity.ok(new MessageResponse("User registered successfully and verification email is sent"));
+        return ResponseEntity.ok(MessageResponse.builder().message("User registered successfully and verification email is sent").build());
     }
 
     @PostMapping("/login")
@@ -54,13 +54,13 @@ public class AuthController {
     @GetMapping("/verify")
     public ResponseEntity<MessageResponse> confirmUserAccount(@RequestParam String token) {
         authService.verifyUser(token);
-        return ResponseEntity.ok(new MessageResponse("User successfully verified"));
+        return ResponseEntity.ok(MessageResponse.builder().message("User successfully verified").build());
     }
 
     @PostMapping("/re-verify")
     public ResponseEntity<MessageResponse> resendVerificationToken(
             @RequestParam @Email(message = "Email should be valid") String email) {
         authService.reVerifyUser(email);
-        return ResponseEntity.ok(new MessageResponse("Verification email successfully sent"));
+        return ResponseEntity.ok(MessageResponse.builder().message("Verification email successfully sent").build());
     }
 }

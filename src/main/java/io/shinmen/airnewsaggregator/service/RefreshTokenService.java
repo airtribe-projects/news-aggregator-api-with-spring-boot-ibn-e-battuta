@@ -51,7 +51,8 @@ public class RefreshTokenService {
 
         if (refreshToken.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(refreshToken);
-            throw new RefreshTokenExpiredException("Refresh token: " + token + " has expired. Please make a new login request");
+            throw new RefreshTokenExpiredException(
+                    "Refresh token: " + token + " has expired. Please make a new login request");
         }
 
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
@@ -59,6 +60,9 @@ public class RefreshTokenService {
 
         String jwt = jwtUtils.generateTokenFromUsername(refreshToken.getUser().getUsername());
 
-        return new TokenRefreshResponse(jwt, refreshToken.getToken());
+        return TokenRefreshResponse.builder()
+                .accessToken(jwt)
+                .refreshToken(refreshToken.getToken())
+                .build();
     }
 }
