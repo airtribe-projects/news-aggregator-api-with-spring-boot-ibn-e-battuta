@@ -14,7 +14,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NewsPreferenceUpdateRequest {
+public class NewsPreferenceRequest {
 
         @Size(max = 10, message = "Maximum 10 categories allowed")
         @ValidCategories(message = "Categories must only contain values from: business, entertainment, general, health, science, sports, technology")

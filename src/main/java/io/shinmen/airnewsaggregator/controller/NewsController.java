@@ -89,23 +89,31 @@ public class NewsController {
     }
 
     @PostMapping("/unfavorite/{articleId}")
-    public ResponseEntity<MessageResponse> markAsUnFavorite(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<MessageResponse> markAsUnFavorite(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable Long articleId) {
         newsArticleService.unMarkArticleStatus(userDetails.getUsername(), articleId, "favorite");
         return ResponseEntity.ok(MessageResponse.builder().message("Article marked as unfavorite").build());
     }
 
     @GetMapping("/read")
-    public ResponseEntity<UserNewsArticleResponse> getReadArticles(
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        UserNewsArticleResponse readArticles = newsArticleService.getReadArticles(userDetails.getUsername());
+    public ResponseEntity<UserNewsArticleResponse> getReadArticles(@AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page must be at least 1") int page,
+            @RequestParam(defaultValue = "20") @Min(value = 1, message = "PageSize must be at least 1") @Max(value = 100, message = "PageSize must not exceed 100") int pageSize) {
+
+        UserNewsArticleResponse readArticles = newsArticleService.getReadArticles(userDetails.getUsername(), page - 1,
+                pageSize);
         return ResponseEntity.ok(readArticles);
     }
 
     @GetMapping("/favorites")
     public ResponseEntity<UserNewsArticleResponse> getFavoriteArticles(
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        UserNewsArticleResponse favoriteArticles = newsArticleService.getFavoriteArticles(userDetails.getUsername());
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page must be at least 1") int page,
+            @RequestParam(defaultValue = "20") @Min(value = 1, message = "PageSize must be at least 1") @Max(value = 100, message = "PageSize must not exceed 100") int pageSize) {
+
+        UserNewsArticleResponse favoriteArticles = newsArticleService.getFavoriteArticles(userDetails.getUsername(),
+                page - 1, pageSize);
         return ResponseEntity.ok(favoriteArticles);
     }
 }

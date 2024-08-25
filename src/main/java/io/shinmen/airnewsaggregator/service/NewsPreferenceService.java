@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.shinmen.airnewsaggregator.exception.NewsPreferencesNotFoundException;
 import io.shinmen.airnewsaggregator.model.NewsPreference;
 import io.shinmen.airnewsaggregator.model.User;
-import io.shinmen.airnewsaggregator.payload.request.NewsPreferenceUpdateRequest;
+import io.shinmen.airnewsaggregator.payload.request.NewsPreferenceRequest;
 import io.shinmen.airnewsaggregator.payload.response.NewsPreferenceResponse;
 import io.shinmen.airnewsaggregator.payload.response.NewsPreferenceResponse.NewsPreferenceResponseBuilder;
 import io.shinmen.airnewsaggregator.repository.NewsPreferenceRepository;
@@ -40,7 +40,7 @@ public class NewsPreferenceService {
 
         @Transactional
         public NewsPreferenceResponse updatePreferences(String username,
-                        NewsPreferenceUpdateRequest updatedPreferences) {
+                        NewsPreferenceRequest updatedPreferences) {
 
                 log.debug("Updating preferences for user: {}", username);
 

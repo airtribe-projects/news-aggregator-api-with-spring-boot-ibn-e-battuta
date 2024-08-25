@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAirNewsExceptions(AirNewsException ex) {
         log.error("Exception occurred: {}", ex.getMessage(), ex);
 
-        HttpStatus status = getResponseStatus(ex);
+        HttpStatus status = extractResponseStatusFromAnnotation(ex);
 
         if (status == null) {
             status = HttpStatus.BAD_REQUEST;
@@ -125,7 +125,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
-    private HttpStatus getResponseStatus(Exception ex) {
+    private HttpStatus extractResponseStatusFromAnnotation(Exception ex) {
         ResponseStatus responseStatus = ex.getClass().getAnnotation(ResponseStatus.class);
 
         if (responseStatus != null) {

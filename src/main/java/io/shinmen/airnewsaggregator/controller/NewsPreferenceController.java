@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.shinmen.airnewsaggregator.payload.request.NewsPreferenceUpdateRequest;
+import io.shinmen.airnewsaggregator.payload.request.NewsPreferenceRequest;
 import io.shinmen.airnewsaggregator.payload.response.NewsPreferenceResponse;
 import io.shinmen.airnewsaggregator.security.UserDetailsImpl;
 import io.shinmen.airnewsaggregator.service.NewsPreferenceService;
@@ -35,7 +35,7 @@ public class NewsPreferenceController {
 
     @PutMapping
     public ResponseEntity<NewsPreferenceResponse> updatePreferences(@AuthenticationPrincipal UserDetailsImpl userDetails,
-            @Valid @RequestBody NewsPreferenceUpdateRequest updatedPreferences) {
+            @Valid @RequestBody NewsPreferenceRequest updatedPreferences) {
 
         log.info("Received request to update preferences for user: {}", userDetails.getUsername());
 

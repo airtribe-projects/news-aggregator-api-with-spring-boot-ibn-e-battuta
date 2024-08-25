@@ -1,8 +1,9 @@
 package io.shinmen.airnewsaggregator.repository;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,9 +14,9 @@ import io.shinmen.airnewsaggregator.model.User;
 public interface NewsArticleRepository extends JpaRepository<NewsArticle, Long> {
     Optional<NewsArticle> findByUserAndUrl(User user, String url);
 
-    List<NewsArticle> findByUserAndIsRead(User user, boolean isRead);
+    Page<NewsArticle> findByUserAndIsRead(User user, boolean isRead, Pageable pageable);
 
-    List<NewsArticle> findByUserAndIsFavorite(User user, boolean isFavorite);
+    Page<NewsArticle> findByUserAndIsFavorite(User user, boolean isFavorite, Pageable pageable);
 
     Optional<NewsArticle> findByUserAndId(User user, Long id);
 }

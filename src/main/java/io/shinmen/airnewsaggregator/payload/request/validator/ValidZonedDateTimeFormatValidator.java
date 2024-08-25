@@ -1,5 +1,6 @@
 package io.shinmen.airnewsaggregator.payload.request.validator;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +30,7 @@ public class ValidZonedDateTimeFormatValidator implements ConstraintValidator<Va
             try {
                 if (format.equals("yyyy-MM-dd")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                    formatter.parse(value);
+                    LocalDate.parse(value, formatter);
                 } else if (format.equals("yyyy-MM-dd'T'HH:mm:ss")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
                     ZonedDateTime.parse(value, formatter.withZone(ZoneId.of(defaultTimeZone)));

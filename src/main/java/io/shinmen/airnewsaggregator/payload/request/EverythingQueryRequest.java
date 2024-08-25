@@ -38,13 +38,8 @@ public class EverythingQueryRequest {
 
     @Min(value = 1, message = "PageSize must be at least 1")
     @Max(value = 100, message = "PageSize must not exceed 100")
-    private Integer pageSize;
+    private Integer pageSize = 20;
 
     @Min(value = 1, message = "Page must be at least 1")
-    private Integer page;
-
-    public EverythingQueryRequest() {
-        page = 1;
-        pageSize = 20;
-    }
+    private Integer page = 1;
 }

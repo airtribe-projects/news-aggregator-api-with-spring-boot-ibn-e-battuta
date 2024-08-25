@@ -2,6 +2,8 @@ package io.shinmen.airnewsaggregator.model;
 
 import java.time.ZonedDateTime;
 
+import org.hibernate.validator.constraints.URL;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,14 +28,15 @@ import lombok.Setter;
 public class NewsArticle {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @URL
+    @Column(nullable = false, length = 1024)
     private String url;
 
     @Column(nullable = false)
@@ -48,7 +51,9 @@ public class NewsArticle {
     @Column(nullable = false)
     private ZonedDateTime publishedAt;
 
+    @Column(columnDefinition = "BOOLEAN")
     private boolean isRead;
 
+    @Column(columnDefinition = "BOOLEAN")
     private boolean isFavorite;
 }
