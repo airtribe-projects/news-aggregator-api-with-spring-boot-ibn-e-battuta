@@ -18,7 +18,7 @@ import io.shinmen.airnewsaggregator.payload.response.RefreshTokenResponse;
 import io.shinmen.airnewsaggregator.repository.RefreshTokenRepository;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
 import io.shinmen.airnewsaggregator.security.JwtUtils;
-
+import io.shinmen.airnewsaggregator.service.helper.ServiceHelper;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -35,7 +35,8 @@ public class RefreshTokenService {
     @Transactional
     public RefreshTokenResponse createRefreshToken(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User with username: " + username + " was not found"));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
@@ -56,7 +57,8 @@ public class RefreshTokenService {
     @Transactional
     public JwtTokenRefreshResponse refreshToken(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh token: " + token + " was not found"));
+                .orElseThrow(() -> new RefreshTokenNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("Refresh token", "token", token)));
 
         if (refreshToken.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(refreshToken);

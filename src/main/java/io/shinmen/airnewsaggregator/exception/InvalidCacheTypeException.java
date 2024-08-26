@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 public class InvalidCacheTypeException extends AirNewsException {
-    public InvalidCacheTypeException(String cacheName) {
-        super("Invalid cache type: " + cacheName);
+    public InvalidCacheTypeException(String message) {
+        super(message);
     }
 }

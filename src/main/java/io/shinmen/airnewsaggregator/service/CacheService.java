@@ -14,7 +14,7 @@ import io.shinmen.airnewsaggregator.exception.CacheNotFoundException;
 import io.shinmen.airnewsaggregator.exception.InvalidCacheTypeException;
 import io.shinmen.airnewsaggregator.exception.KeyNotFoundException;
 import io.shinmen.airnewsaggregator.payload.response.CacheResponse;
-
+import io.shinmen.airnewsaggregator.service.helper.ServiceHelper;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,7 +29,8 @@ public class CacheService {
                 .map(cacheName -> {
                     org.springframework.cache.Cache cache = cacheManager.getCache(cacheName);
                     if (cache == null) {
-                        throw new CacheNotFoundException(cacheName);
+                        throw new CacheNotFoundException(
+                                ServiceHelper.getEntityNotFoundMessage("Cache", "name", cacheName));
                     }
 
                     try {
@@ -43,20 +44,20 @@ public class CacheService {
                                 .build();
 
                     } catch (ClassCastException e) {
-                        throw new InvalidCacheTypeException(cacheName);
+                        throw new InvalidCacheTypeException("Cache with name :" + cacheName + " is invalid");
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void clearCache(String cacheName) {
         if (!cacheManager.getCacheNames().contains(cacheName)) {
-            throw new CacheNotFoundException(cacheName);
+            throw new CacheNotFoundException(ServiceHelper.getEntityNotFoundMessage("Cache", "name", cacheName));
         }
 
         org.springframework.cache.Cache cache = cacheManager.getCache(cacheName);
         if (cache == null) {
-            throw new CacheNotFoundException(cacheName);
+            throw new CacheNotFoundException(ServiceHelper.getEntityNotFoundMessage("Cache", "name", cacheName));
         }
 
         cache.clear();
@@ -64,12 +65,12 @@ public class CacheService {
 
     public CacheResponse getCache(String cacheName, String key) {
         if (!cacheManager.getCacheNames().contains(cacheName)) {
-            throw new CacheNotFoundException(cacheName);
+            throw new CacheNotFoundException(ServiceHelper.getEntityNotFoundMessage("Cache", "name", cacheName));
         }
 
         org.springframework.cache.Cache cache = cacheManager.getCache(cacheName);
         if (cache == null) {
-            throw new CacheNotFoundException(cacheName);
+            throw new CacheNotFoundException(ServiceHelper.getEntityNotFoundMessage("Cache", "name", cacheName));
         }
 
         try {
@@ -77,7 +78,8 @@ public class CacheService {
 
             if (key != null) {
                 Object value = Optional.ofNullable(cache.get(key, Object.class))
-                        .orElseThrow(() -> new KeyNotFoundException(key, cacheName));
+                        .orElseThrow(() -> new KeyNotFoundException(
+                                ServiceHelper.getEntityNotFoundMessage("Cache key", "name", key)));
 
                 return CacheResponse.builder()
                         .cacheName(cacheName)
@@ -95,7 +97,7 @@ public class CacheService {
                     .build();
 
         } catch (ClassCastException e) {
-            throw new InvalidCacheTypeException(cacheName);
+            throw new InvalidCacheTypeException("Cache with name :" + cacheName + " is invalid");
         }
     }
 

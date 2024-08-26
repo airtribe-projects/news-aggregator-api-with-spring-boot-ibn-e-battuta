@@ -57,7 +57,9 @@ public class NewsApiService {
                 "sources", request.getSources(),
                 "page", request.getPage(),
                 "pageSize", request.getPageSize());
-        return getNewsArticleResponse(topHeadlinesUrl);
+
+        log.info("Headlines url {}", topHeadlinesUrl);
+        return getArticleResponses(topHeadlinesUrl);
     }
 
     @Cacheable(value = "search", key = "#query + '-' + #page + '-' + #pageSize")
@@ -66,7 +68,9 @@ public class NewsApiService {
                 "q", query,
                 "page", String.valueOf(page),
                 "pageSize", String.valueOf(pageSize));
-        return getNewsArticleResponse(searchUrl);
+
+        log.info("search url: {}", searchUrl);
+        return getArticleResponses(searchUrl);
     }
 
     @Cacheable(value = "everything", key = "#request.toCacheKey()")
@@ -81,13 +85,16 @@ public class NewsApiService {
                 "sortBy", request.getSortBy(),
                 "page", request.getPage(),
                 "pageSize", request.getPageSize());
-        return getNewsArticleResponse(everythingUrl);
+
+        log.info("Everything url {}", everythingUrl);
+        return getArticleResponses(everythingUrl);
     }
 
     @Transactional
     @Scheduled(fixedRate = 24 * 60 * 60 * 1000)
     public void fetchAndUpdateNewsSources() throws JsonProcessingException {
         String sourcesUrl = buildUrl("top-headlines/sources");
+        log.info("Sources url {}", sourcesUrl);
         NewsApiSourceResponse newsApiSourceResponse = getNewsApiSourceResponse(sourcesUrl);
         saveSources(newsApiSourceResponse);
     }
@@ -143,7 +150,7 @@ public class NewsApiService {
         Optional.ofNullable(paramValue).ifPresent(value -> builder.queryParam(paramName, value));
     }
 
-    private List<ArticleResponse> getNewsArticleResponse(String url) {
+    private List<ArticleResponse> getArticleResponses(String url) {
         try {
             String response = restTemplate.getForObject(url, String.class);
             NewsApiArticleResponse articleResponse = objectMapper.readValue(response, NewsApiArticleResponse.class);

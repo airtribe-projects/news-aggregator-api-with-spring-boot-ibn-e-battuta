@@ -15,7 +15,7 @@ public class CacheConfigProperties {
 
     @Data
     public static class CaffeineCache {
-        private List<String> cacheNames;
+        private String cacheName;
         private String spec;
     }
 }

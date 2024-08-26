@@ -11,7 +11,7 @@ import io.shinmen.airnewsaggregator.model.Article;
 import io.shinmen.airnewsaggregator.model.User;
 
 @Repository
-public interface NewsArticleRepository extends JpaRepository<Article, Long> {
+public interface ArticleRepository extends JpaRepository<Article, Long> {
     Optional<Article> findByUserAndUrl(User user, String url);
 
     Page<Article> findByUserAndIsRead(User user, boolean isRead, Pageable pageable);

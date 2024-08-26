@@ -18,6 +18,7 @@ import io.shinmen.airnewsaggregator.model.VerificationToken;
 import io.shinmen.airnewsaggregator.payload.response.VerificationTokenResponse;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
 import io.shinmen.airnewsaggregator.repository.VerificationTokenRepository;
+import io.shinmen.airnewsaggregator.service.helper.ServiceHelper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VerificationTokenService {
 
-    @Value("${air-news-aggregator.app.verifyTokenExpirationMs}")
+    @Value("${air-news-aggregator.app.verifyTokenExpirationMs:86400000}")
     private Long verificationTokenDurationMs;
 
     private final VerificationTokenRepository verificationTokenRepository;
@@ -40,7 +41,8 @@ public class VerificationTokenService {
     @Transactional
     public VerificationTokenResponse createVerificationToken(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User with username: " + username + " was not found"));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
 
         VerificationToken verificationToken = VerificationToken.builder()
                 .user(user)
@@ -56,7 +58,7 @@ public class VerificationTokenService {
     public void verifyUser(String token) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
                 .orElseThrow(() -> new VerificationTokenNotFoundException(
-                        "Verification token: " + token + " not found or has expired or user is already verified"));
+                        ServiceHelper.getEntityNotFoundMessage("Verification token", "token", token)));
 
         if (verificationToken.getExpiryDate().isBefore(Instant.now())) {
             verificationTokenRepository.delete(verificationToken);
@@ -72,7 +74,8 @@ public class VerificationTokenService {
     @Transactional
     public VerificationTokenResponse reVerifyUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email: " + email + " not found"));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "email", email)));
 
         if (!user.isEnabled()) {
             throw new UserAlreadyVerifiedException("User is already verified");
@@ -89,6 +92,8 @@ public class VerificationTokenService {
 
         verificationTokenRepository.save(verificationToken);
 
-        return VerificationTokenResponse.builder().token(verificationToken.getToken()).build();
+        return VerificationTokenResponse.builder()
+                .token(verificationToken.getToken())
+                .build();
     }
 }

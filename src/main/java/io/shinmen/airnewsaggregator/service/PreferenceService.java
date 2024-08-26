@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.shinmen.airnewsaggregator.exception.PreferencesNotFoundException;
+import io.shinmen.airnewsaggregator.exception.UserNotFoundException;
 import io.shinmen.airnewsaggregator.model.Preference;
 import io.shinmen.airnewsaggregator.model.Source;
 import io.shinmen.airnewsaggregator.model.User;
@@ -20,7 +21,7 @@ import io.shinmen.airnewsaggregator.payload.response.UserResponse;
 import io.shinmen.airnewsaggregator.repository.PreferenceRepository;
 import io.shinmen.airnewsaggregator.repository.SourceRepository;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
-
+import io.shinmen.airnewsaggregator.service.helper.ServiceHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,10 +40,12 @@ public class PreferenceService {
         log.debug("Fetching preferences for user: {}", username);
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
 
         Preference preference = preferenceRepository.findByUser(user)
-                .orElseThrow(() -> new PreferencesNotFoundException("User preferences not found"));
+                .orElseThrow(() -> new PreferencesNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("Preferences", "user", String.valueOf(user.getId()))));
 
         return convertToPreferenceResponse(preference);
     }
@@ -54,7 +57,8 @@ public class PreferenceService {
         log.debug("Updating preferences for user: {}", username);
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
 
         Preference preference = preferenceRepository.findByUser(user).orElse(new Preference());
 

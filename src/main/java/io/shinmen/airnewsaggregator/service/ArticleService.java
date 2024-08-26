@@ -21,9 +21,9 @@ import io.shinmen.airnewsaggregator.model.User;
 import io.shinmen.airnewsaggregator.payload.response.ArticleResponse;
 import io.shinmen.airnewsaggregator.payload.response.UserArticleResponse;
 import io.shinmen.airnewsaggregator.payload.response.UserResponse;
-import io.shinmen.airnewsaggregator.repository.NewsArticleRepository;
+import io.shinmen.airnewsaggregator.repository.ArticleRepository;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
-
+import io.shinmen.airnewsaggregator.service.helper.ServiceHelper;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,10 +33,7 @@ public class ArticleService {
     @Value("${air-news-aggregator.app.default-timezone:UTC}")
     private String defaultTimeZone;
 
-    private static final String FORMAT_DATE = "yyyy-MM-dd";
-    private static final String FORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ss";
-
-    private final NewsArticleRepository newsArticleRepository;
+    private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
 
     private static final String READ = "read";
@@ -47,36 +44,38 @@ public class ArticleService {
             String source, String publishedAt, String action) {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(getUserNotFoundMessage(username)));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
 
-        Article newsArticle = newsArticleRepository.findByUserAndUrl(user, url)
+        Article article = articleRepository.findByUserAndUrl(user, url)
                 .orElse(new Article());
 
-        newsArticle.setUser(user);
-        newsArticle.setTitle(title);
-        newsArticle.setAuthor(author);
-        newsArticle.setSource(source);
-        newsArticle.setUrl(url);
-        newsArticle.setPublishedAt(parsePublishedAt(publishedAt));
+        article.setUser(user);
+        article.setTitle(title);
+        article.setAuthor(author);
+        article.setSource(source);
+        article.setUrl(url);
+        article.setPublishedAt(parsePublishedAt(publishedAt));
 
         if (action.equals(READ))
-            newsArticle.setRead(true);
+            article.setRead(true);
 
         if (action.equals(FAVORITE)) {
-            newsArticle.setFavorite(true);
+            article.setFavorite(true);
         }
 
-        newsArticleRepository.save(newsArticle);
+        articleRepository.save(article);
     }
 
     @Transactional(readOnly = true)
     public UserArticleResponse getReadArticles(String username, int page, int size) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(getUserNotFoundMessage(username)));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Article> readArticles = newsArticleRepository.findByUserAndIsRead(user, true, pageable);
+        Page<Article> readArticles = articleRepository.findByUserAndIsRead(user, true, pageable);
 
         return getUserArticleResponse(user, readArticles);
     }
@@ -84,11 +83,12 @@ public class ArticleService {
     @Transactional(readOnly = true)
     public UserArticleResponse getFavoriteArticles(String username, int page, int size) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(getUserNotFoundMessage(username)));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Article> favoriteArticles = newsArticleRepository.findByUserAndIsFavorite(user, true, pageable);
+        Page<Article> favoriteArticles = articleRepository.findByUserAndIsFavorite(user, true, pageable);
 
         return getUserArticleResponse(user, favoriteArticles);
     }
@@ -117,48 +117,46 @@ public class ArticleService {
     }
 
     @Transactional
-    public void unMarkArticleStatus(String username, Long articleId, String action) {
+    public void unMarkArticleStatus(String username, Long id, String action) {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(getUserNotFoundMessage(username)));
+                .orElseThrow(() -> new UserNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
 
-        Article newsArticle = newsArticleRepository.findByUserAndId(user, articleId)
-                .orElseThrow(() -> new ArticleNotFoundException("Article with id: " + articleId + " not found"));
+        Article article = articleRepository.findByUserAndId(user, id)
+                .orElseThrow(() -> new ArticleNotFoundException(
+                        ServiceHelper.getEntityNotFoundMessage("Article", "id", String.valueOf(id))));
 
-        if (action.equals(READ) && !newsArticle.isFavorite()) {
-            newsArticleRepository.delete(newsArticle);
+        if (action.equals(READ) && !article.isFavorite()) {
+            articleRepository.delete(article);
             return;
         }
 
-        if (action.equals(FAVORITE) && !newsArticle.isRead()) {
-            newsArticleRepository.delete(newsArticle);
+        if (action.equals(FAVORITE) && !article.isRead()) {
+            articleRepository.delete(article);
             return;
         }
 
         if (action.equals(FAVORITE)) {
-            newsArticle.setFavorite(false);
-            newsArticleRepository.save(newsArticle);
+            article.setFavorite(false);
+            articleRepository.save(article);
             return;
         }
 
         if (action.equals(READ)) {
-            newsArticle.setRead(false);
-            newsArticleRepository.save(newsArticle);
+            article.setRead(false);
+            articleRepository.save(article);
         }
-    }
-
-    private String getUserNotFoundMessage(String username) {
-        return "User with username: " + username + " not found";
     }
 
     private ZonedDateTime parsePublishedAt(String publishedAt) {
         try {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(ServiceHelper.FORMAT_DATE);
             LocalDate localDate = LocalDate.parse(publishedAt, dateFormatter);
             return localDate.atStartOfDay(ZoneId.of(defaultTimeZone));
         } catch (DateTimeParseException e) {
             try {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(FORMAT_DATETIME);
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(ServiceHelper.FORMAT_DATETIME);
                 return ZonedDateTime.parse(publishedAt, dateTimeFormatter.withZone(ZoneId.of(defaultTimeZone)));
             } catch (DateTimeParseException ex) {
                 throw new IllegalArgumentException(
