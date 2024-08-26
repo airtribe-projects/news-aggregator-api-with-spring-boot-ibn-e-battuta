@@ -12,21 +12,23 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import io.shinmen.airnewsaggregator.exception.NewsArticleNotFoundException;
+import io.shinmen.airnewsaggregator.exception.ArticleNotFoundException;
 import io.shinmen.airnewsaggregator.exception.UserNotFoundException;
-import io.shinmen.airnewsaggregator.model.NewsArticle;
+import io.shinmen.airnewsaggregator.model.Article;
 import io.shinmen.airnewsaggregator.model.User;
-import io.shinmen.airnewsaggregator.payload.response.NewsArticlesResponse;
-import io.shinmen.airnewsaggregator.payload.response.UserNewsArticleResponse;
+import io.shinmen.airnewsaggregator.payload.response.ArticleResponse;
+import io.shinmen.airnewsaggregator.payload.response.UserArticleResponse;
 import io.shinmen.airnewsaggregator.payload.response.UserResponse;
 import io.shinmen.airnewsaggregator.repository.NewsArticleRepository;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class NewsArticleService {
+public class ArticleService {
 
     @Value("${air-news-aggregator.app.default-timezone:UTC}")
     private String defaultTimeZone;
@@ -40,14 +42,15 @@ public class NewsArticleService {
     private static final String READ = "read";
     private static final String FAVORITE = "favorite";
 
+    @Transactional
     public void markArticleStatus(String username, String url, String title, String author,
             String source, String publishedAt, String action) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(getUserNotFoundMessage(username)));
 
-        NewsArticle newsArticle = newsArticleRepository.findByUserAndUrl(user, url)
-                .orElse(new NewsArticle());
+        Article newsArticle = newsArticleRepository.findByUserAndUrl(user, url)
+                .orElse(new Article());
 
         newsArticle.setUser(user);
         newsArticle.setTitle(title);
@@ -66,31 +69,33 @@ public class NewsArticleService {
         newsArticleRepository.save(newsArticle);
     }
 
-    public UserNewsArticleResponse getReadArticles(String username, int page, int size) {
+    @Transactional(readOnly = true)
+    public UserArticleResponse getReadArticles(String username, int page, int size) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException(getUserNotFoundMessage(username)));
+                .orElseThrow(() -> new UserNotFoundException(getUserNotFoundMessage(username)));
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<NewsArticle> readArticles = newsArticleRepository.findByUserAndIsRead(user, true, pageable);
+        Page<Article> readArticles = newsArticleRepository.findByUserAndIsRead(user, true, pageable);
 
-        return getUserResponse(user, readArticles);
+        return getUserArticleResponse(user, readArticles);
     }
 
-    public UserNewsArticleResponse getFavoriteArticles(String username, int page, int size) {
+    @Transactional(readOnly = true)
+    public UserArticleResponse getFavoriteArticles(String username, int page, int size) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException(getUserNotFoundMessage(username)));
+                .orElseThrow(() -> new UserNotFoundException(getUserNotFoundMessage(username)));
 
         Pageable pageable = PageRequest.of(page, size);
-        
-        Page<NewsArticle> favoriteArticles = newsArticleRepository.findByUserAndIsFavorite(user, true, pageable);
 
-        return getUserResponse(user, favoriteArticles);
+        Page<Article> favoriteArticles = newsArticleRepository.findByUserAndIsFavorite(user, true, pageable);
+
+        return getUserArticleResponse(user, favoriteArticles);
     }
 
-    private UserNewsArticleResponse getUserResponse(User user, Page<NewsArticle> newsArticles) {
-        List<NewsArticlesResponse> articleResponses = newsArticles.stream()
-                .map(article -> NewsArticlesResponse.builder()
+    private UserArticleResponse getUserArticleResponse(User user, Page<Article> newsArticles) {
+        List<ArticleResponse> articleResponses = newsArticles.stream()
+                .map(article -> ArticleResponse.builder()
                         .title(article.getTitle())
                         .author(article.getAuthor())
                         .source(article.getSource())
@@ -104,20 +109,21 @@ public class NewsArticleService {
                 .userName(user.getUsername())
                 .build();
 
-        return UserNewsArticleResponse.builder()
-                .newsArticles(articleResponses)
+        return UserArticleResponse.builder()
+                .articles(articleResponses)
                 .user(userResponse)
                 .total(articleResponses == null ? 0 : articleResponses.size())
                 .build();
     }
 
+    @Transactional
     public void unMarkArticleStatus(String username, Long articleId, String action) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(getUserNotFoundMessage(username)));
 
-        NewsArticle newsArticle = newsArticleRepository.findByUserAndId(user, articleId)
-                .orElseThrow(() -> new NewsArticleNotFoundException("Article with id: " + articleId + " not found"));
+        Article newsArticle = newsArticleRepository.findByUserAndId(user, articleId)
+                .orElseThrow(() -> new ArticleNotFoundException("Article with id: " + articleId + " not found"));
 
         if (action.equals(READ) && !newsArticle.isFavorite()) {
             newsArticleRepository.delete(newsArticle);
@@ -156,7 +162,7 @@ public class NewsArticleService {
                 return ZonedDateTime.parse(publishedAt, dateTimeFormatter.withZone(ZoneId.of(defaultTimeZone)));
             } catch (DateTimeParseException ex) {
                 throw new IllegalArgumentException(
-                        "Invalid 'publishedAt' format. Please use 'yyyy-MM-dd' or 'yyyy-MM-ddTHH:mm:ss'.");
+                        "Invalid 'publishedAt' format. Please use 'yyyy-MM-dd' or 'yyyy-MM-ddTHH:mm:ss'");
             }
         }
     }

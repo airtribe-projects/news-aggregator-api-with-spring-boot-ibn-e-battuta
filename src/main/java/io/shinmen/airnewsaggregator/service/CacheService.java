@@ -14,6 +14,7 @@ import io.shinmen.airnewsaggregator.exception.CacheNotFoundException;
 import io.shinmen.airnewsaggregator.exception.InvalidCacheTypeException;
 import io.shinmen.airnewsaggregator.exception.KeyNotFoundException;
 import io.shinmen.airnewsaggregator.payload.response.CacheResponse;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -34,8 +35,12 @@ public class CacheService {
                     try {
                         Cache<?, ?> nativeCache = (Cache<?, ?>) cache.getNativeCache();
                         Map<?, ?> cacheData = nativeCache.asMap();
-                        return CacheResponse.builder().cacheName(cacheName).size(nativeCache.estimatedSize())
-                                .data(cacheData).build();
+
+                        return CacheResponse.builder()
+                                .cacheName(cacheName)
+                                .size(nativeCache.estimatedSize())
+                                .data(cacheData)
+                                .build();
 
                     } catch (ClassCastException e) {
                         throw new InvalidCacheTypeException(cacheName);
@@ -73,12 +78,20 @@ public class CacheService {
             if (key != null) {
                 Object value = Optional.ofNullable(cache.get(key, Object.class))
                         .orElseThrow(() -> new KeyNotFoundException(key, cacheName));
-                return CacheResponse.builder().cacheName(cacheName).size(1).data(Map.of(key, value)).build();
+
+                return CacheResponse.builder()
+                        .cacheName(cacheName)
+                        .size(1)
+                        .data(Map.of(key, value))
+                        .build();
             }
 
-            // Return the entire cache data
             Map<?, ?> cacheData = nativeCache.asMap();
-            return CacheResponse.builder().cacheName(cacheName).size(nativeCache.estimatedSize()).data(cacheData)
+
+            return CacheResponse.builder()
+                    .cacheName(cacheName)
+                    .size(nativeCache.estimatedSize())
+                    .data(cacheData)
                     .build();
 
         } catch (ClassCastException e) {

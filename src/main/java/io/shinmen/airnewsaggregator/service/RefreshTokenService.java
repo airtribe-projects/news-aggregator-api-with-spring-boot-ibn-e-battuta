@@ -10,11 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.shinmen.airnewsaggregator.exception.RefreshTokenExpiredException;
 import io.shinmen.airnewsaggregator.exception.RefreshTokenNotFoundException;
+import io.shinmen.airnewsaggregator.exception.UserNotFoundException;
 import io.shinmen.airnewsaggregator.model.RefreshToken;
 import io.shinmen.airnewsaggregator.model.User;
-import io.shinmen.airnewsaggregator.payload.response.TokenRefreshResponse;
+import io.shinmen.airnewsaggregator.payload.response.JwtTokenRefreshResponse;
+import io.shinmen.airnewsaggregator.payload.response.RefreshTokenResponse;
 import io.shinmen.airnewsaggregator.repository.RefreshTokenRepository;
+import io.shinmen.airnewsaggregator.repository.UserRepository;
 import io.shinmen.airnewsaggregator.security.JwtUtils;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,10 +29,14 @@ public class RefreshTokenService {
     private Long refreshTokenDurationMs;
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
 
     @Transactional
-    public RefreshToken createRefreshToken(User user) {
+    public RefreshTokenResponse createRefreshToken(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User with username: " + username + " was not found"));
+
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
@@ -36,7 +44,7 @@ public class RefreshTokenService {
                 .build();
 
         refreshTokenRepository.save(refreshToken);
-        return refreshToken;
+        return RefreshTokenResponse.builder().token(refreshToken.getToken()).build();
     }
 
     @Transactional
@@ -46,7 +54,7 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public TokenRefreshResponse refreshToken(String token) {
+    public JwtTokenRefreshResponse refreshToken(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh token: " + token + " was not found"));
 
@@ -61,7 +69,7 @@ public class RefreshTokenService {
 
         String jwt = jwtUtils.generateTokenFromUsername(refreshToken.getUser().getUsername());
 
-        return TokenRefreshResponse.builder()
+        return JwtTokenRefreshResponse.builder()
                 .accessToken(jwt)
                 .refreshToken(refreshToken.getToken())
                 .build();
