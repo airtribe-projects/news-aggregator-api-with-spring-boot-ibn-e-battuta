@@ -26,6 +26,7 @@ import io.shinmen.airnewsaggregator.security.AuthEntryPointJwt;
 import io.shinmen.airnewsaggregator.security.AuthTokenFilter;
 import io.shinmen.airnewsaggregator.security.JwtUtils;
 import io.shinmen.airnewsaggregator.security.UserDetailsServiceImpl;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration

@@ -19,14 +19,12 @@ public class CacheConfig {
     @Bean
     CacheManager cacheManager() {
         final CaffeineCacheManager manager = new CaffeineCacheManager();
-        cacheConfigProperties.getCaffeineCaches()
-                .forEach(cc -> createCaffeineCache(manager, cc));
+        cacheConfigProperties.getCaffeineCaches().forEach(cache -> createCaffeineCache(manager, cache));
         return manager;
     }
 
     private void createCaffeineCache(CaffeineCacheManager manager, CacheConfigProperties.CaffeineCache caffeineCache) {
         Cache<Object, Object> cache = Caffeine.from(caffeineCache.getSpec()).build();
-        caffeineCache.getCacheNames()
-                .forEach(cn -> manager.registerCustomCache(cn, cache));
+        caffeineCache.getCacheNames().forEach(cn -> manager.registerCustomCache(cn, cache));
     }
 }
