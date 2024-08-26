@@ -12,7 +12,9 @@ import io.shinmen.airnewsaggregator.model.User;
 import io.shinmen.airnewsaggregator.model.enums.UserRole;
 import io.shinmen.airnewsaggregator.repository.RoleRepository;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
+
 import jakarta.annotation.PostConstruct;
+
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -23,8 +25,6 @@ public class AirNewsInitializer {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // These values can be configured in the application.properties or
-    // application.yml
     @Value("${air-news-aggregator.admin.username}")
     private String adminUsername;
 
@@ -36,13 +36,10 @@ public class AirNewsInitializer {
 
     @PostConstruct
     public void initAdminUser() {
-        // Ensure roles exist first
         initRoles();
 
-        // Check if an admin user exists
         Optional<User> adminUserOpt = userRepository.findByUsername(adminUsername);
         if (adminUserOpt.isEmpty()) {
-            // Create admin user with ROLE_ADMIN
             User adminUser = User.builder()
                     .username(adminUsername)
                     .password(passwordEncoder.encode(adminPassword))
