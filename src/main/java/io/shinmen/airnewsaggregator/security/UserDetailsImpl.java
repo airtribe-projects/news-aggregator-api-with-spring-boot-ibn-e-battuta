@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.shinmen.airnewsaggregator.model.User;
+
 import lombok.Getter;
 
 @Getter

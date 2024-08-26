@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.shinmen.airnewsaggregator.exception.UserUnverifiedException;
 import io.shinmen.airnewsaggregator.model.User;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service

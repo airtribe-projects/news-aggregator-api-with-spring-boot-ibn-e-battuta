@@ -12,6 +12,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -23,10 +24,6 @@ public class JwtUtils {
 
     @Value("${air-news-aggregator.app.jwtExpirationMs}")
     private int jwtExpirationMs;
-
-    public String generateJwtToken(UserDetailsImpl userPrincipal) {
-        return generateTokenFromUsername(userPrincipal.getUsername());
-    }
 
     public String generateTokenFromUsername(String username) {
         long now = System.currentTimeMillis();
