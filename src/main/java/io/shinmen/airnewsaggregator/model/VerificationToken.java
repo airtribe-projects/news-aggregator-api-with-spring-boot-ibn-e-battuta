@@ -12,6 +12,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,12 +20,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-    name = "verification_tokens",
-    indexes = {
+@Table(name = "verification_tokens", indexes = {
         @Index(name = "idx_verification_token_user_id", columnList = "user_id")
-    }
-)
+})
 @Getter
 @Setter
 @Builder

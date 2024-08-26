@@ -6,6 +6,7 @@ import java.util.Set;
 import io.shinmen.airnewsaggregator.model.enums.Category;
 import io.shinmen.airnewsaggregator.model.enums.Country;
 import io.shinmen.airnewsaggregator.model.enums.Language;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -16,10 +17,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,13 +31,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "news_preferences")
+@Table(name = "preferences")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewsPreference {
+public class Preference {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,17 +50,19 @@ public class NewsPreference {
 
     @Size(max = 10, message = "Maximum 10 categories allowed")
     @ElementCollection
-    @CollectionTable(name = "news_preference_categories", joinColumns = @JoinColumn(name = "preference_id"))
+    @CollectionTable(name = "preference_categories", joinColumns = @JoinColumn(name = "preference_id"))
     @Column(name = "category")
     @Builder.Default
     private Set<Category> categories = new HashSet<>();
 
-    @Size(max = 20, message = "Maximum 20 sources allowed")
-    @ElementCollection
-    @CollectionTable(name = "news_preference_sources", joinColumns = @JoinColumn(name = "preference_id"))
-    @Column(name = "source")
+    @ManyToMany
+    @JoinTable(
+            name = "preference_sources",
+            joinColumns = @JoinColumn(name = "preference_id"),
+            inverseJoinColumns = @JoinColumn(name = "source_id")
+    )
     @Builder.Default
-    private Set<String> sources = new HashSet<>();
+    private Set<Source> sources = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "country")
