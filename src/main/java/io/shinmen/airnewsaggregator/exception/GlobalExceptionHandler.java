@@ -2,6 +2,7 @@ package io.shinmen.airnewsaggregator.exception;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import io.shinmen.airnewsaggregator.payload.response.ErrorResponse;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -39,6 +42,21 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(status)
                 .message("Error: " + error)
+                .timestamp(ZonedDateTime.now())
+                .build();
+
+        return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    @ExceptionHandler(NewsApiException.class)
+    public ResponseEntity<ErrorResponse> handleNewsApiExceptions(NewsApiException ex) {
+        log.error("NewsApiException occurred: {}", ex.getMessage(), ex);
+
+        HttpStatus status = ex.getHttpStatus();
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(status)
+                .message(ex.getCode().toUpperCase() + ": " + ex.getMessage())
                 .timestamp(ZonedDateTime.now())
                 .build();
 
@@ -114,12 +132,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
-        log.error("Unexpected error occurred", ex);
+        log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message("An unexpected error occurred")
                 .timestamp(ZonedDateTime.now())
+                .details(Arrays.asList(
+                        ex.getMessage(),
+                        ex.getClass().getCanonicalName()))
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
