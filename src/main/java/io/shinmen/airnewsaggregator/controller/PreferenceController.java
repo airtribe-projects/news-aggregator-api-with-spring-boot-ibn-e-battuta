@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.shinmen.airnewsaggregator.payload.request.NewsPreferenceRequest;
-import io.shinmen.airnewsaggregator.payload.response.NewsPreferenceResponse;
+import io.shinmen.airnewsaggregator.payload.request.PreferenceRequest;
+import io.shinmen.airnewsaggregator.payload.response.PreferenceResponse;
 import io.shinmen.airnewsaggregator.security.UserDetailsImpl;
-import io.shinmen.airnewsaggregator.service.NewsPreferenceService;
+import io.shinmen.airnewsaggregator.service.PreferenceService;
+
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,27 +22,27 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/preferences")
 @RequiredArgsConstructor
 @Slf4j
-public class NewsPreferenceController {
+public class PreferenceController {
 
-    private final NewsPreferenceService newsPreferenceService;
+    private final PreferenceService preferenceService;
 
     @GetMapping
-    public ResponseEntity<NewsPreferenceResponse> getPreferences(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<PreferenceResponse> getPreferences(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         log.info("Received request to get preferences for user: {}", userDetails.getUsername());
 
-        NewsPreferenceResponse response = newsPreferenceService.getPreferencesForUser(userDetails.getUsername());
-        return ResponseEntity.ok(response);
+        PreferenceResponse preference = preferenceService.getPreferencesForUser(userDetails.getUsername());
+        return ResponseEntity.ok(preference);
     }
 
     @PutMapping
-    public ResponseEntity<NewsPreferenceResponse> updatePreferences(@AuthenticationPrincipal UserDetailsImpl userDetails,
-            @Valid @RequestBody NewsPreferenceRequest updatedPreferences) {
+    public ResponseEntity<PreferenceResponse> updatePreferences(@AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Valid @RequestBody PreferenceRequest updatedPreferences) {
 
         log.info("Received request to update preferences for user: {}", userDetails.getUsername());
 
-        NewsPreferenceResponse response = newsPreferenceService.updatePreferences(userDetails.getUsername(),
+        PreferenceResponse preference = preferenceService.updatePreferences(userDetails.getUsername(),
                 updatedPreferences);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(preference);
     }
 }

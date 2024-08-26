@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.shinmen.airnewsaggregator.payload.response.CacheResponse;
 import io.shinmen.airnewsaggregator.payload.response.MessageResponse;
 import io.shinmen.airnewsaggregator.service.CacheService;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,11 +32,14 @@ public class CacheController {
     @DeleteMapping("/{cacheName}")
     public ResponseEntity<MessageResponse> clearCache(@PathVariable String cacheName) {
         cacheService.clearCache(cacheName);
-        return ResponseEntity.ok(MessageResponse.builder().message("Cache cleared successfully").build());
+        return ResponseEntity.ok(MessageResponse.builder()
+                .message("Cache cleared successfully")
+                .build());
     }
 
     @GetMapping("/{cacheName}")
-    public ResponseEntity<CacheResponse> getCacheData(@PathVariable String cacheName, @RequestParam(required = false) String key) {
+    public ResponseEntity<CacheResponse> getCacheData(@PathVariable String cacheName,
+            @RequestParam(required = false) String key) {
         CacheResponse response = cacheService.getCache(cacheName, key);
         return ResponseEntity.ok(response);
     }
