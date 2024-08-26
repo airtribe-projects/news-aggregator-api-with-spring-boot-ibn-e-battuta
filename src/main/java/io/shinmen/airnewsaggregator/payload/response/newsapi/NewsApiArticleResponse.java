@@ -1,23 +1,16 @@
 package io.shinmen.airnewsaggregator.payload.response.newsapi;
 
-import java.time.ZonedDateTime;
+import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-@Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Setter
 public class NewsApiArticleResponse {
-
-    private String title;
-    private String description;
-    private String url;
-    private String urlToImage;
-    private String author;
-    private ZonedDateTime publishedAt;
-    private String content;
-    private NewsApiSourceResponse source;
+    private String status;
+    private int totalResults;
+    private List<NewsApiArticle> articles;
+    private String code;
+    private String message;
 }

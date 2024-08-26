@@ -2,18 +2,20 @@ package io.shinmen.airnewsaggregator.payload.request.validator;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidZonedDateTime;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ValidZonedDateTimeFormatValidator implements ConstraintValidator<ValidZonedDateTimeFormat, String> {
+public class ZonedDateTimeValidator implements ConstraintValidator<ValidZonedDateTime, String> {
 
     @Value("${air-news-aggregator.app.default-timezone:UTC}")
     private String defaultTimeZone;
@@ -33,7 +35,7 @@ public class ValidZonedDateTimeFormatValidator implements ConstraintValidator<Va
                     LocalDate.parse(value, formatter);
                 } else if (format.equals("yyyy-MM-dd'T'HH:mm:ss")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                    ZonedDateTime.parse(value, formatter.withZone(ZoneId.of(defaultTimeZone)));
+                    java.time.ZonedDateTime.parse(value, formatter.withZone(ZoneId.of(defaultTimeZone)));
                 }
                 return true;
             } catch (DateTimeParseException e) {

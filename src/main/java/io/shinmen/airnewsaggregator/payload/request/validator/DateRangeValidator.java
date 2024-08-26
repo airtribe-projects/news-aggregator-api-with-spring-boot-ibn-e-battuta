@@ -9,12 +9,15 @@ import java.time.format.DateTimeParseException;
 import org.springframework.beans.factory.annotation.Value;
 
 import io.shinmen.airnewsaggregator.payload.request.EverythingQueryRequest;
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.DateRange;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ValidDateRangeValidator implements ConstraintValidator<ValidDateRange, EverythingQueryRequest> {
+public class DateRangeValidator implements ConstraintValidator<DateRange, EverythingQueryRequest> {
 
     private static final String FORMAT_DATE = "yyyy-MM-dd";
     private static final String FORMAT_DATETIME = "yyyy-MM-dd'T'HH:mm:ss";
@@ -40,24 +43,22 @@ public class ValidDateRangeValidator implements ConstraintValidator<ValidDateRan
 
     private ZonedDateTime parseDate(String dateString) {
         try {
-            // Try parsing as 'yyyy-MM-dd'
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(FORMAT_DATE);
             LocalDate localDate = LocalDate.parse(dateString, dateFormatter);
-            return localDate.atStartOfDay(ZoneId.of(defaultTimeZone)); // Convert LocalDate to ZonedDateTime
+            return localDate.atStartOfDay(ZoneId.of(defaultTimeZone));
 
         } catch (DateTimeParseException e) {
             log.debug("Date is not in 'yyyy-MM-dd' format, trying other formats: {}", dateString, e);
         }
 
         try {
-            // Try parsing as 'yyyy-MM-ddTHH:mm:ss'
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(FORMAT_DATETIME);
             return ZonedDateTime.parse(dateString, dateTimeFormatter.withZone(ZoneId.of(defaultTimeZone)));
 
         } catch (DateTimeParseException e) {
-            log.debug("Invalid date format for ZonedDateTime: {}", dateString, e);
+            log.debug("Invalid date format for ValidZonedDateTime: {}", dateString, e);
         }
 
-        return null; // Return null if both formats fail to parse
+        return null;
     }
 }

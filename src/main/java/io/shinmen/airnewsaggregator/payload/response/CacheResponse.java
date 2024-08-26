@@ -13,6 +13,7 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CacheResponse {
     private String cacheName;
+
     private long size;
 
     @JsonProperty

@@ -6,16 +6,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.shinmen.airnewsaggregator.model.enums.Category;
+
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NewsPreferenceResponse {
-
-    private String username;
-    private String email;
+public class PreferenceResponse {
+    private UserResponse user;
 
     @JsonProperty
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

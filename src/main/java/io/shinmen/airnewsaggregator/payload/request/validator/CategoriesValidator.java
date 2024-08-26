@@ -3,10 +3,12 @@ package io.shinmen.airnewsaggregator.payload.request.validator;
 import java.util.Set;
 
 import io.shinmen.airnewsaggregator.model.enums.Category;
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.Categories;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class ValidCategoriesValidator implements ConstraintValidator<ValidCategories, Set<Category>> {
+public class CategoriesValidator implements ConstraintValidator<Categories, Set<Category>> {
 
     @Override
     public boolean isValid(Set<Category> categories, ConstraintValidatorContext context) {
@@ -15,21 +17,11 @@ public class ValidCategoriesValidator implements ConstraintValidator<ValidCatego
         }
 
         for (Category category : categories) {
-            if (category == null || !isValidCategory(category)) {
+            if (category == Category.UNKNOWN) {
                 return false;
             }
         }
 
         return true;
-    }
-
-    private boolean isValidCategory(Category category) {
-        return category == Category.BUSINESS
-                || category == Category.ENTERTAINMENT
-                || category == Category.GENERAL
-                || category == Category.HEALTH
-                || category == Category.SCIENCE
-                || category == Category.SPORTS
-                || category == Category.TECHNOLOGY;
     }
 }

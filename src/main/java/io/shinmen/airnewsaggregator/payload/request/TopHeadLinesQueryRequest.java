@@ -2,10 +2,13 @@ package io.shinmen.airnewsaggregator.payload.request;
 
 import io.shinmen.airnewsaggregator.model.enums.Category;
 import io.shinmen.airnewsaggregator.model.enums.Country;
-import io.shinmen.airnewsaggregator.payload.request.validator.ValidCategory;
-import io.shinmen.airnewsaggregator.payload.request.validator.ValidCountry;
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.Source;
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidCategory;
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidCountry;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,20 +26,15 @@ public class TopHeadLinesQueryRequest {
             + " nz, ph, pl, pt, ro, rs, ru, sa, se, sg, si, sk, th, tr, tw, ua, us, ve, za or empty for all countries")
     private Country country;
 
+    @Source
     private String sources;
 
     @Min(value = 1, message = "Page must be at least 1")
-    private Integer page;
+    private Integer page = 1;
 
     @Min(value = 1, message = "PageSize must be at least 1")
     @Max(value = 100, message = "PageSize must not exceed 100")
-    private Integer pageSize;
+    private Integer pageSize = 20;
 
-    private boolean useSources;
-
-    public TopHeadLinesQueryRequest() {
-        this.page = 1;
-        this.pageSize = 20;
-        this.useSources = false;
-    }
+    private boolean user = false;
 }

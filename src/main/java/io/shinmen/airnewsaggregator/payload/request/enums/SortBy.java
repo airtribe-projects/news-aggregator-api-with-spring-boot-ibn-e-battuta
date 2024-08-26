@@ -25,7 +25,7 @@ public enum SortBy {
         try {
             return SortBy.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
-            log.error("Illegal SortBy value: {}", value, e);
+            log.error("Illegal ValidSortBy value: {}", value, e);
             return UNKNOWN;
         }
     }

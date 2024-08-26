@@ -1,10 +1,12 @@
 package io.shinmen.airnewsaggregator.payload.request.validator;
 
 import io.shinmen.airnewsaggregator.model.enums.Category;
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidCategory;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class ValidCategoryValidator implements ConstraintValidator<ValidCategory, Category> {
+public class CategoryValidator implements ConstraintValidator<ValidCategory, Category> {
 
     @Override
     public boolean isValid(Category category, ConstraintValidatorContext context) {

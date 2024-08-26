@@ -16,5 +16,5 @@ public class NewsResponse {
 
     @JsonProperty
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<NewsArticlesResponse> articles;
+    private List<ArticleResponse> articles;
 }

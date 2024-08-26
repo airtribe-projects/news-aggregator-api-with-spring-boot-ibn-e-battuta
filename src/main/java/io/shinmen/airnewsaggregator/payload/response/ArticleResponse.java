@@ -1,5 +1,7 @@
 package io.shinmen.airnewsaggregator.payload.response;
 
+import java.time.ZonedDateTime;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Builder;
@@ -8,12 +10,14 @@ import lombok.Getter;
 @Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LoginResponse {
-    private String username;
+public class ArticleResponse {
+    private String title;
 
-    private String email;
+    private String url;
 
-    private String token;
+    private String author;
 
-    private String refreshToken;
+    private ZonedDateTime publishedAt;
+
+    private String source;
 }

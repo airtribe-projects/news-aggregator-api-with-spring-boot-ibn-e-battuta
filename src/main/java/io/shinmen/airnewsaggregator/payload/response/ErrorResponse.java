@@ -16,7 +16,9 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
     private HttpStatus status;
+
     private String message;
+
     private ZonedDateTime timestamp;
 
     @JsonProperty

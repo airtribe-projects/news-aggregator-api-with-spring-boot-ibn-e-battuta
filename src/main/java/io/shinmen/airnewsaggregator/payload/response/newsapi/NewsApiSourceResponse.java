@@ -1,18 +1,15 @@
 package io.shinmen.airnewsaggregator.payload.response.newsapi;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-@Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Setter
 public class NewsApiSourceResponse {
-    @NotBlank(message = "Source ID cannot be blank")
-    private String id;
-
-    @NotBlank(message = "Source name is mandatory")
-    private String name;
+    private String status;
+    private List<NewsApiSource> sources;
+    private String code;
+    private String message;
 }

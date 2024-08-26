@@ -1,7 +1,7 @@
 package io.shinmen.airnewsaggregator.payload.request;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import lombok.Builder;
@@ -16,18 +16,25 @@ public class TopHeadLinesSearchRequest {
     private String category;
     private String country;
     private String sources;
-    private boolean useSources;
 
     public String toCacheKey() {
-        if (useSources)
-            return Stream.of(query, sources, page, pageSize)
-                    .filter(Objects::nonNull)
-                    .map(String::valueOf)
-                    .collect(Collectors.joining("-"));
+        List<String> keys = Stream.of(
+                normalize(query).replace(" ", "-"),
+                normalize(sources),
+                normalize(country),
+                normalize(category),
+                normalize(pageSize),
+                normalize(page))
+                .filter(s -> !s.isEmpty())
+                .flatMap(s -> Arrays.stream(s.split(",")))
+                .map(s -> s.trim().replace(" ", "-"))
+                .sorted()
+                .toList();
 
-        return Stream.of(query, category, country, page, pageSize)
-                .filter(Objects::nonNull)
-                .map(String::valueOf)
-                .collect(Collectors.joining("-"));
+        return String.join("-", keys);
+    }
+
+    private String normalize(String value) {
+        return value != null ? value : "";
     }
 }

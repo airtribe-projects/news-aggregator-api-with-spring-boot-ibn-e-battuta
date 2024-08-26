@@ -8,12 +8,6 @@ import lombok.Getter;
 @Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LoginResponse {
-    private String username;
-
-    private String email;
-
+public class RefreshTokenResponse {
     private String token;
-
-    private String refreshToken;
 }
