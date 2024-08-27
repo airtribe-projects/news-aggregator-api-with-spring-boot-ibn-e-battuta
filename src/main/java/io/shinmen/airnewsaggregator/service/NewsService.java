@@ -1,11 +1,15 @@
 package io.shinmen.airnewsaggregator.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.checkerframework.checker.units.qual.s;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -20,6 +24,7 @@ import io.shinmen.airnewsaggregator.model.enums.Country;
 import io.shinmen.airnewsaggregator.model.enums.Language;
 import io.shinmen.airnewsaggregator.payload.request.EverythingQueryRequest;
 import io.shinmen.airnewsaggregator.payload.request.EverythingSearchRequest;
+import io.shinmen.airnewsaggregator.payload.request.SearchRequest;
 import io.shinmen.airnewsaggregator.payload.request.TopHeadLinesQueryRequest;
 import io.shinmen.airnewsaggregator.payload.request.TopHeadLinesSearchRequest;
 import io.shinmen.airnewsaggregator.payload.response.ArticleResponse;
@@ -38,19 +43,19 @@ public class NewsService {
     private final UserRepository userRepository;
     private final PreferenceRepository preferenceRepository;
 
-    public NewsResponse getTopHeadLines(TopHeadLinesQueryRequest request, String userName) {
-        User user = request.isUser() ? getUser(userName) : null;
-        Preference preference = user != null ? getPreference(user) : new Preference();
+    public NewsResponse getTopHeadLines(final TopHeadLinesQueryRequest request, final String userName) {
 
-        String sources = getSources(request.getSources(), preference, request.isUser());
-        List<String> categories = getCategories(sources, request, preference);
-        String country = getCountry(sources, request, preference);
+        final User user = request.isUser() ? getUser(userName) : null;
+        final Preference preference = user != null ? getPreference(user) : new Preference();
+        final String sources = getSources(request.getSources(), preference, request.isUser());
+        final Set<String> categories = getCategories(sources, request, preference);
+        final String country = getCountry(sources, request, preference);
+        final String page = getPageData(request.getPage());
+        final String pageSize = getPageData(request.getPageSize());
 
-        String page = getPageData(request.getPage());
-        String pageSize = getPageData(request.getPageSize());
-
-        List<ArticleResponse> articleResponses = getArticleResponses(request.getQuery(), country, categories, sources,
-                page, pageSize);
+        final List<ArticleResponse> articleResponses = getArticleResponses(request.getQuery(), country,
+                categories,
+                sources, page, pageSize);
 
         return NewsResponse.builder()
                 .articles(articleResponses)
@@ -58,28 +63,39 @@ public class NewsService {
                 .build();
     }
 
-    public NewsResponse searchNews(String keyword, int page, int pageSize) {
-        List<ArticleResponse> articleResponses = newsApiService.search(keyword, page, pageSize);
+    public NewsResponse searchNews(final String keyword, final int page, final int pageSize) {
+
+        SearchRequest request = SearchRequest.builder()
+                .query(keyword)
+                .page(String.valueOf(page))
+                .pageSize(String.valueOf(pageSize))
+                .build();
+
+        final List<ArticleResponse> articleResponses = newsApiService.search(request);
+
         return NewsResponse.builder()
                 .articles(articleResponses)
                 .total(articleResponses == null ? 0 : articleResponses.size())
                 .build();
     }
 
-    public NewsResponse getEverything(EverythingQueryRequest request, String userName) throws JsonProcessingException {
-        User user = request.isUser() ? getUser(userName) : null;
-        Preference preference = user != null ? getPreference(user) : new Preference();
+    public NewsResponse getEverything(final EverythingQueryRequest request, final String userName)
+            throws JsonProcessingException {
 
-        String sources = getSources(request.getSources(), preference, request.isUser());
-        String page = getPageData(request.getPage());
-        String pageSize = getPageData(request.getPageSize());
-        String domains = request.getDomains();
-        String from = request.getFrom();
-        String to = request.getTo();
-        String language = getLanguage(Optional.ofNullable(request.getLanguage()), preference, request.isUser());
-        String sortBy = Optional.ofNullable(request.getSortBy()).map(Enum::toString).orElse(null);
+        final User user = request.isUser() ? getUser(userName) : null;
+        final Preference preference = user != null ? getPreference(user) : new Preference();
 
-        RequestParams params = RequestParams.builder()
+        final String sources = getSources(request.getSources(), preference, request.isUser());
+        final String page = getPageData(request.getPage());
+        final String pageSize = getPageData(request.getPageSize());
+        final String domains = request.getDomains();
+        final String from = request.getFrom();
+        final String to = request.getTo();
+        final String language = getLanguage(Optional.ofNullable(request.getLanguage()), preference,
+                request.isUser());
+        final String sortBy = Optional.ofNullable(request.getSortBy()).map(Enum::toString).orElse(null);
+
+        final RequestParams params = RequestParams.builder()
                 .query(request.getQuery())
                 .sources(sources)
                 .domains(domains)
@@ -91,7 +107,7 @@ public class NewsService {
                 .pageSize(pageSize)
                 .build();
 
-        List<ArticleResponse> articleResponses = getArticleResponses(params);
+        final List<ArticleResponse> articleResponses = getArticleResponses(params);
 
         return NewsResponse.builder()
                 .articles(articleResponses)
@@ -99,8 +115,9 @@ public class NewsService {
                 .build();
     }
 
-    private List<ArticleResponse> getArticleResponses(RequestParams params) {
-        EverythingSearchRequest request = EverythingSearchRequest.builder()
+    private List<ArticleResponse> getArticleResponses(final RequestParams params) {
+
+        final EverythingSearchRequest request = EverythingSearchRequest.builder()
                 .query(params.query())
                 .domains(params.domains())
                 .sources(params.sources())
@@ -115,16 +132,21 @@ public class NewsService {
         return newsApiService.getEverything(request);
     }
 
-    private List<ArticleResponse> getArticleResponses(String query, String country, List<String> categories,
-            String sources, String page, String pageSize) {
+    private List<ArticleResponse> getArticleResponses(final String query, final String country,
+            final Set<String> categories,
+            final String sources, final String page, final String pageSize) {
+
         return categories.stream()
-                .map(category -> createTopHeadLinesSearchRequest(query, country, category, sources, page, pageSize))
+                .map(category -> createTopHeadLinesSearchRequest(query, country, category, sources,
+                        page, pageSize))
                 .flatMap(request -> newsApiService.getTopHeadlines(request).stream())
                 .toList();
     }
 
-    private TopHeadLinesSearchRequest createTopHeadLinesSearchRequest(String query, String country, String category,
-            String sources, String page, String pageSize) {
+    private TopHeadLinesSearchRequest createTopHeadLinesSearchRequest(final String query, final String country,
+            final String category,
+            final String sources, final String page, final String pageSize) {
+
         return TopHeadLinesSearchRequest.builder()
                 .query(query)
                 .country(country)
@@ -135,73 +157,100 @@ public class NewsService {
                 .build();
     }
 
-    private List<String> getCategories(String sources, TopHeadLinesQueryRequest request, Preference preference) {
-        List<String> categories = new ArrayList<>();
+    private Set<String> getCategories(final String sources, final TopHeadLinesQueryRequest request,
+            final Preference preference) {
+
+        final Set<String> categories = new HashSet<>();
+
         if (sources == null) {
             categories.addAll(getCategories(request.getCategory(), preference, request.isUser()));
+
             return categories;
         }
 
         categories.add(null);
+
         return categories;
     }
 
-    private String getCountry(String sources, TopHeadLinesQueryRequest request, Preference preference) {
+    private String getCountry(final String sources, final TopHeadLinesQueryRequest request,
+            final Preference preference) {
+
         if (sources == null) {
             return getValidCountry(Optional.ofNullable(request.getCountry()), preference, request.isUser());
         }
+
         return null;
     }
 
-    private String getSources(String sources, Preference preference, boolean user) {
-        String userSources = user && preference != null && preference.getSources() != null
-                ? String.join(",", preference.getSources().stream().map(Source::getId).toList())
-                : null;
+    private String getSources(final String sources, final Preference preference, final boolean user) {
 
-        return Stream.of(userSources, sources)
-                .filter(StringUtils::hasText)
-                .collect(Collectors.joining(","));
+        if (sources != null) {
+            final String userSources = user && preference != null && preference.getSources() != null
+                    ? String.join(",", preference.getSources()
+                            .stream()
+                            .map(Source::getId)
+                            .toList())
+                    : null;
+
+            return Stream.of(userSources, sources)
+                    .filter(StringUtils::hasText)
+                    .flatMap(src -> Arrays.stream(src.split(",")))
+                    .collect(Collectors.toSet())
+                    .stream()
+                    .collect(Collectors.joining(","));
+        }
+
+        return null;
     }
 
-    private List<String> getCategories(Category category, Preference preference, boolean user) {
-        List<String> categories = new ArrayList<>();
+    private Set<String> getCategories(final Category category, final Preference preference, final boolean user) {
+
+        Set<String> categories = new HashSet<>();
 
         if (category != null) {
             categories.add(category.toValue());
         }
 
         if (user && preference != null && preference.getCategories() != null) {
-            categories.addAll(preference.getCategories().stream().map(Category::toValue).toList());
+            categories.addAll(preference.getCategories()
+                    .stream()
+                    .map(Category::toValue)
+                    .toList());
         }
 
         return categories;
     }
 
-    private String getValidCountry(Optional<Country> country, Preference preference, boolean isUser) {
+    private String getValidCountry(final Optional<Country> country, final Preference preference,
+            final boolean isUser) {
+
         return country.map(Country::toValue)
                 .orElseGet(() -> isUser && preference != null && preference.getCountry() != null
                         ? preference.getCountry().toValue()
                         : null);
     }
 
-    private String getLanguage(Optional<Language> language, Preference preference, boolean user) {
+    private String getLanguage(final Optional<Language> language, final Preference preference, final boolean user) {
+
         return language.map(Language::toValue)
                 .orElseGet(() -> user && preference != null && preference.getLanguage() != null
                         ? preference.getLanguage().toValue()
                         : null);
     }
 
-    private String getPageData(Integer pageSize) {
-        return pageSize != null ? pageSize.toString() : "1";
+    private String getPageData(final int pageData) {
+        return String.valueOf(pageData);
     }
 
-    private Preference getPreference(User user) {
-        return preferenceRepository.findByUser(user).orElse(new Preference());
+    private Preference getPreference(final User user) {
+        return preferenceRepository.findByUser(user)
+                .orElse(new Preference());
     }
 
-    private User getUser(String userName) {
+    private User getUser(final String userName) {
         return userRepository.findByUsername(userName)
-                .orElseThrow(() -> new UserNotFoundException("User with username: " + userName + " not found"));
+                .orElseThrow(() -> new UserNotFoundException(userName));
     }
 
     @Builder

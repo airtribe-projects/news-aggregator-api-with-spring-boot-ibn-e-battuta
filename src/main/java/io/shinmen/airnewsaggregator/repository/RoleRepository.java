@@ -8,5 +8,5 @@ import io.shinmen.airnewsaggregator.model.Role;
 import io.shinmen.airnewsaggregator.model.enums.UserRole;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
-    Optional<Role> findByName(UserRole name);
+    Optional<Role> findByName(final UserRole name);
 }

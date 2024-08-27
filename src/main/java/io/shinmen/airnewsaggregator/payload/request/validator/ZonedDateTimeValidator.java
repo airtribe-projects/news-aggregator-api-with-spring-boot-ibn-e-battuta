@@ -2,13 +2,14 @@ package io.shinmen.airnewsaggregator.payload.request.validator;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import org.springframework.beans.factory.annotation.Value;
 
 import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidZonedDateTime;
-
+import io.shinmen.airnewsaggregator.utility.Constants;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -21,21 +22,21 @@ public class ZonedDateTimeValidator implements ConstraintValidator<ValidZonedDat
     private String defaultTimeZone;
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
+    public boolean isValid(final String value, final ConstraintValidatorContext context) {
         if (value == null || value.isEmpty()) {
             return true;
         }
 
-        String[] acceptableFormats = { "yyyy-MM-dd", "yyyy-MM-dd'T'HH:mm:ss" };
+        final String[] acceptableFormats = { Constants.FORMAT_DATE, Constants.FORMAT_DATETIME };
 
-        for (String format : acceptableFormats) {
+        for (final String format : acceptableFormats) {
             try {
-                if (format.equals("yyyy-MM-dd")) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+                if (format.equals(Constants.FORMAT_DATE)) {
+                    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
                     LocalDate.parse(value, formatter);
-                } else if (format.equals("yyyy-MM-dd'T'HH:mm:ss")) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                    java.time.ZonedDateTime.parse(value, formatter.withZone(ZoneId.of(defaultTimeZone)));
+                } else if (format.equals(Constants.FORMAT_DATETIME)) {
+                    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+                    ZonedDateTime.parse(value, formatter.withZone(ZoneId.of(defaultTimeZone)));
                 }
                 return true;
             } catch (DateTimeParseException e) {

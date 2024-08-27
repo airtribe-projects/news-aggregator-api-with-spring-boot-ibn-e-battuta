@@ -12,11 +12,11 @@ import io.shinmen.airnewsaggregator.model.User;
 
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
-    Optional<Article> findByUserAndUrl(User user, String url);
+    Optional<Article> findByUserAndUrl(final User user, final String url);
 
-    Page<Article> findByUserAndIsRead(User user, boolean isRead, Pageable pageable);
+    Page<Article> findByUserAndIsRead(final User user, final boolean isRead, final Pageable pageable);
 
-    Page<Article> findByUserAndIsFavorite(User user, boolean isFavorite, Pageable pageable);
+    Page<Article> findByUserAndIsFavorite(final User user, final boolean isFavorite, final Pageable pageable);
 
-    Optional<Article> findByUserAndId(User user, Long id);
+    Optional<Article> findByUserAndId(final User user, final Long id);
 }

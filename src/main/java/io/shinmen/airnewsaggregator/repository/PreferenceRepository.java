@@ -10,5 +10,5 @@ import io.shinmen.airnewsaggregator.model.User;
 
 @Repository
 public interface PreferenceRepository extends JpaRepository<Preference, Long> {
-    Optional<Preference> findByUser(User user);
+    Optional<Preference> findByUser(final User user);
 }

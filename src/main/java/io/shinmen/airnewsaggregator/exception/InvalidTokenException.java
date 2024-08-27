@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class InvalidTokenException extends AirNewsException {
-    public InvalidTokenException(String message) {
-        super(message);
+    public InvalidTokenException(final String token) {
+        super("Token: " + token + " is invalid");
     }
 }

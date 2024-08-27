@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class VerificationTokenNotFoundException extends AirNewsException {
-    public VerificationTokenNotFoundException(String message) {
-        super(message);
+    public VerificationTokenNotFoundException(final String token) {
+        super("Verification token: " + token + " was not found");
     }
 }

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.FORBIDDEN)
 public class UserUnverifiedException extends AirNewsException {
-    public UserUnverifiedException(String message) {
-        super(message);
+    public UserUnverifiedException(final String user) {
+        super("User" + user + " is not verified");
     }
 }

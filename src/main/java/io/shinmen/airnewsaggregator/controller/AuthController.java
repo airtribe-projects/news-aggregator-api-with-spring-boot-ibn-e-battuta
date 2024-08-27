@@ -1,5 +1,15 @@
 package io.shinmen.airnewsaggregator.controller;
 
+import static io.shinmen.airnewsaggregator.utility.Constants.API_AUTH;
+import static io.shinmen.airnewsaggregator.utility.Constants.API_AUTH_LOGIN;
+import static io.shinmen.airnewsaggregator.utility.Constants.API_AUTH_REFRESH_TOKEN;
+import static io.shinmen.airnewsaggregator.utility.Constants.API_AUTH_REGISTER;
+import static io.shinmen.airnewsaggregator.utility.Constants.API_AUTH_RE_VERIFY;
+import static io.shinmen.airnewsaggregator.utility.Constants.API_AUTH_VERIFY;
+import static io.shinmen.airnewsaggregator.utility.Messages.USER_REGISTRATION_MESSAGE;
+import static io.shinmen.airnewsaggregator.utility.Messages.USER_RE_VERIFICATION_EMAIL_MESSAGE;
+import static io.shinmen.airnewsaggregator.utility.Messages.USER_VERIFICATION_MESSAGE;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,50 +32,72 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@Slf4j
 @Validated
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(API_AUTH)
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<MessageResponse> register(@Valid @RequestBody SignupRequest signUpRequest) {
-        authService.registerUser(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPassword());
+    @PostMapping(API_AUTH_REGISTER)
+    public ResponseEntity<MessageResponse> register(@Valid @RequestBody final SignupRequest request) {
+
+        log.info("Received signup request for user: {}", request.getUsername());
+
+        authService.registerUser(request.getUsername(), request.getEmail(), request.getPassword());
+
         return ResponseEntity.ok(MessageResponse.builder()
-                .message("User registered successfully and verification email is sent").build());
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        LoginResponse loginResponse = authService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
-        return ResponseEntity.ok(loginResponse);
-    }
-
-    @PostMapping("/refresh-token")
-    public ResponseEntity<JwtTokenRefreshResponse> refresh(
-            @Valid @RequestBody TokenRefreshRequest tokenRefreshRequest) {
-        JwtTokenRefreshResponse tokenRefreshResponse = authService.refreshToken(tokenRefreshRequest.getRefreshToken());
-        return ResponseEntity.ok(tokenRefreshResponse);
-    }
-
-    @GetMapping("/verify")
-    public ResponseEntity<MessageResponse> confirmUserAccount(@RequestParam String token) {
-        authService.verifyUser(token);
-        return ResponseEntity.ok(MessageResponse.builder()
-                .message("User successfully verified")
+                .message(USER_REGISTRATION_MESSAGE)
                 .build());
     }
 
-    @PostMapping("/re-verify")
-    public ResponseEntity<MessageResponse> resendVerificationToken(
-            @RequestParam @Email(message = "Email should be valid") String email) {
-        authService.reVerifyUser(email);
+    @PostMapping(API_AUTH_LOGIN)
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody final LoginRequest request) {
+
+        log.info("Received login request for user: {}", request.getUsername());
+
+        final LoginResponse loginResponse = authService.loginUser(request.getUsername(), request.getPassword());
+
+        return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping(API_AUTH_REFRESH_TOKEN)
+    public ResponseEntity<JwtTokenRefreshResponse> refresh(@Valid @RequestBody final TokenRefreshRequest request) {
+
+        log.info("Received refresh token request: {}", request.getToken());
+
+        final JwtTokenRefreshResponse response = authService.refreshToken(request.getToken());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(API_AUTH_VERIFY)
+    public ResponseEntity<MessageResponse> confirmUserAccount(@RequestParam final String token) {
+
+        log.info("Received verification request for token: {}", token);
+
+        authService.verifyUser(token);
+
         return ResponseEntity.ok(MessageResponse.builder()
-                .message("Verification email successfully sent")
+                .message(USER_VERIFICATION_MESSAGE)
+                .build());
+    }
+
+    @PostMapping(API_AUTH_RE_VERIFY)
+    public ResponseEntity<MessageResponse> resendVerificationToken(
+            @RequestParam @Email(message = "Email should be valid") final String email) {
+
+        log.info("Received re-verification request for email: {}", email);
+
+        authService.reVerifyUser(email);
+
+        return ResponseEntity.ok(MessageResponse.builder()
+                .message(USER_RE_VERIFICATION_EMAIL_MESSAGE)
                 .build());
     }
 }

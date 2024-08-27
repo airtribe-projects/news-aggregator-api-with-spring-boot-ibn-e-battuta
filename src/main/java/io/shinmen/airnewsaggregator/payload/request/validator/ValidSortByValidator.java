@@ -6,10 +6,10 @@ import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidSo
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class SortByValidator implements ConstraintValidator<ValidSortBy, SortBy> {
+public class ValidSortByValidator implements ConstraintValidator<ValidSortBy, SortBy> {
 
     @Override
-    public boolean isValid(SortBy sortBy, ConstraintValidatorContext context) {
+    public boolean isValid(final SortBy sortBy, final ConstraintValidatorContext context) {
         if (sortBy == null) {
             return true;
         }

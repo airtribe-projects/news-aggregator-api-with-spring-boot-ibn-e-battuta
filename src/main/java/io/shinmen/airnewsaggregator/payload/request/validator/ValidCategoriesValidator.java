@@ -3,20 +3,20 @@ package io.shinmen.airnewsaggregator.payload.request.validator;
 import java.util.Set;
 
 import io.shinmen.airnewsaggregator.model.enums.Category;
-import io.shinmen.airnewsaggregator.payload.request.validator.annotation.Categories;
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidCategories;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class CategoriesValidator implements ConstraintValidator<Categories, Set<Category>> {
+public class ValidCategoriesValidator implements ConstraintValidator<ValidCategories, Set<Category>> {
 
     @Override
-    public boolean isValid(Set<Category> categories, ConstraintValidatorContext context) {
+    public boolean isValid(final Set<Category> categories, final ConstraintValidatorContext context) {
         if (categories == null || categories.isEmpty()) {
             return true;
         }
 
-        for (Category category : categories) {
+        for (final Category category : categories) {
             if (category == Category.UNKNOWN) {
                 return false;
             }

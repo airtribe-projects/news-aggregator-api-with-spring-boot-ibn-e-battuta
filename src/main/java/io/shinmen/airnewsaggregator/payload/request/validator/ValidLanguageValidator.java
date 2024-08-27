@@ -6,11 +6,11 @@ import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidLa
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class LanguageValidator
+public class ValidLanguageValidator
         implements ConstraintValidator<ValidLanguage, Language> {
 
     @Override
-    public boolean isValid(Language language, ConstraintValidatorContext context) {
+    public boolean isValid(final Language language, final ConstraintValidatorContext context) {
         if (language == null) {
             return true;
         }

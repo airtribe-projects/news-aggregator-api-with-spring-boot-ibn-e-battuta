@@ -6,17 +6,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.shinmen.airnewsaggregator.payload.request.validator.ValidCountryValidator;
+import io.shinmen.airnewsaggregator.payload.request.validator.ValidDateRangeValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = ValidCountryValidator.class)
-@Target({ ElementType.FIELD })
+@Constraint(validatedBy = ValidDateRangeValidator.class)
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidCountry {
-    String message() default "Invalid sort by value.";
+public @interface ValidDateRange {
+    String message() default "The 'from' date must be earlier than or equal to the 'to' date";
 
     Class<?>[] groups() default {};
 

@@ -48,7 +48,7 @@ public class Preference {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Size(max = 10, message = "Maximum 10 categories allowed")
+    @Size(max = 10, message = "Maximum 7 categories allowed")
     @ElementCollection
     @CollectionTable(name = "preference_categories", joinColumns = @JoinColumn(name = "preference_id"))
     @Column(name = "category")
@@ -56,11 +56,7 @@ public class Preference {
     private Set<Category> categories = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(
-            name = "preference_sources",
-            joinColumns = @JoinColumn(name = "preference_id"),
-            inverseJoinColumns = @JoinColumn(name = "source_id")
-    )
+    @JoinTable(name = "preference_sources", joinColumns = @JoinColumn(name = "preference_id"), inverseJoinColumns = @JoinColumn(name = "source_id"))
     @Builder.Default
     private Set<Source> sources = new HashSet<>();
 

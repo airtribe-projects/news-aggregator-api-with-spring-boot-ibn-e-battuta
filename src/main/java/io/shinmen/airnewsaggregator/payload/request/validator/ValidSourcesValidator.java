@@ -2,7 +2,7 @@ package io.shinmen.airnewsaggregator.payload.request.validator;
 
 import java.util.Set;
 
-import io.shinmen.airnewsaggregator.payload.request.validator.annotation.Sources;
+import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidSources;
 import io.shinmen.airnewsaggregator.payload.request.validator.helper.ValidationHelper;
 import io.shinmen.airnewsaggregator.service.SourceService;
 
@@ -12,12 +12,12 @@ import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class SourcesValidator implements ConstraintValidator<Sources, Set<String>> {
+public class ValidSourcesValidator implements ConstraintValidator<ValidSources, Set<String>> {
 
     private final SourceService sourceService;
 
     @Override
-    public boolean isValid(Set<String> sourceIds, ConstraintValidatorContext context) {
+    public boolean isValid(final Set<String> sourceIds, final ConstraintValidatorContext context) {
         if (sourceIds == null || sourceIds.isEmpty()) {
             return true;
         }

@@ -6,9 +6,11 @@ import java.util.stream.Stream;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
-@Builder
+@Slf4j
 @Getter
+@Builder
 public class TopHeadLinesSearchRequest {
     private String query;
     private String page;
@@ -31,7 +33,11 @@ public class TopHeadLinesSearchRequest {
                 .sorted()
                 .toList();
 
-        return String.join("-", keys);
+        String cacheKey = String.join("-", keys);
+
+        log.info("Cache key: {}", cacheKey);
+
+        return cacheKey;
     }
 
     private String normalize(String value) {

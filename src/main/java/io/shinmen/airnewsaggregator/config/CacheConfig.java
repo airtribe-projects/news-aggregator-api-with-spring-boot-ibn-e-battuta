@@ -24,7 +24,7 @@ public class CacheConfig {
     }
 
     private void createCaffeineCache(CaffeineCacheManager manager, CacheConfigProperties.CaffeineCache caffeineCache) {
-        Cache<Object, Object> cache = Caffeine.from(caffeineCache.getSpec()).build();
+        final Cache<Object, Object> cache = Caffeine.from(caffeineCache.getSpec()).build();
         manager.registerCustomCache(caffeineCache.getCacheName(), cache);
     }
 }

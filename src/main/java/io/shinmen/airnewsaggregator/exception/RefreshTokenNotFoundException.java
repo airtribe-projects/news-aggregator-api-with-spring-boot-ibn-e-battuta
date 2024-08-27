@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class RefreshTokenNotFoundException extends AirNewsException {
-    public RefreshTokenNotFoundException(String message) {
-        super(message);
+    public RefreshTokenNotFoundException(final String token) {
+        super("Refresh token: " + token + " was not found");
     }
 }

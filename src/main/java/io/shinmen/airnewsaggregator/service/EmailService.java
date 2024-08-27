@@ -12,7 +12,7 @@ public class EmailService {
     @Value("${server.port}")
     private String port;
 
-    public void sendVerificationEmail(String to, String token) {
+    public void sendVerificationEmail(final String to, final String token) {
         String url = "http://localhost:" + port + "/api/auth/verify?token=" + token;
         log.info("Hi {}, to confirm your account, please click here : {}", to, url);
     }

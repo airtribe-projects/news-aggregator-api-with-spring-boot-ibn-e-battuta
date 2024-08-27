@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class RoleNotFoundException extends AirNewsException {
-    public RoleNotFoundException(String message) {
-        super(message);
+    public RoleNotFoundException(final String role) {
+        super("Role: " + role + " was not found");
     }
 }

@@ -6,10 +6,10 @@ import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidCo
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class CountryValidator implements ConstraintValidator<ValidCountry, Country> {
+public class ValidCountryValidator implements ConstraintValidator<ValidCountry, Country> {
 
     @Override
-    public boolean isValid(Country country, ConstraintValidatorContext context) {
+    public boolean isValid(final Country country, final ConstraintValidatorContext context) {
         if (country == null) {
             return true;
         }

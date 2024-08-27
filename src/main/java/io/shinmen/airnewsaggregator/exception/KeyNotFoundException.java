@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class KeyNotFoundException extends AirNewsException {
-    public KeyNotFoundException(String message) {
-        super(message);
+    public KeyNotFoundException(final String cache, final String key) {
+        super("Cache: " + cache + " with key: " + key + " was not found");
     }
 }

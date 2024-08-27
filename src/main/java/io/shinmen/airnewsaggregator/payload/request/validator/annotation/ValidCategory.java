@@ -6,13 +6,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.shinmen.airnewsaggregator.payload.request.validator.CategoryValidator;
+import io.shinmen.airnewsaggregator.payload.request.validator.ValidCategoryValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = CategoryValidator.class)
+@Constraint(validatedBy = ValidCategoryValidator.class)
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidCategory {

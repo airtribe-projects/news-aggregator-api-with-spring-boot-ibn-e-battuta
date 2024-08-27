@@ -22,9 +22,11 @@ import io.shinmen.airnewsaggregator.payload.response.UserResponse;
 import io.shinmen.airnewsaggregator.repository.RoleRepository;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
 import io.shinmen.airnewsaggregator.security.JwtUtils;
-import io.shinmen.airnewsaggregator.service.helper.ServiceHelper;
-import lombok.RequiredArgsConstructor;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -36,52 +38,63 @@ public class UserService {
     private final JwtUtils jwtUtils;
 
     @Transactional
-    public UserResponse createUser(String username, String email, String password) {
+    public UserResponse createUser(final String username, final String email, final String password) {
         Optional<User> existingUser = userRepository.findByUsername(username);
 
         if (existingUser.isPresent()) {
-            throw new UserAlreadyExistsException("Username is already in use");
+            log.error("User already exists with username: {}", username);
+
+            throw new UserAlreadyExistsException(username);
         }
 
         existingUser = userRepository.findByEmail(email);
 
         if (existingUser.isPresent()) {
-            throw new UserAlreadyExistsException("Email is already in use");
+            log.error("User already exists with email: {}", email);
+
+            throw new UserAlreadyExistsException(email);
         }
 
-        User user = User.builder()
+        final User user = User.builder()
                 .username(username)
                 .password(passwordEncoder.encode(password))
                 .email(email)
                 .build();
 
-        Role userRole = roleRepository.findByName(UserRole.ROLE_USER)
-                .orElseThrow(() -> new RoleNotFoundException(
-                        ServiceHelper.getEntityNotFoundMessage("Role", "role", UserRole.ROLE_USER.toString())));
+        final Role userRole = roleRepository.findByName(UserRole.ROLE_USER)
+                .orElseThrow(() -> new RoleNotFoundException(UserRole.ROLE_USER.name()));
 
         user.getRoles().add(userRole);
 
         userRepository.save(user);
 
-        return UserResponse.builder().email(user.getEmail()).userName(user.getUsername()).build();
+        log.info("User created successfully with username: {}", username);
+
+        return UserResponse.builder()
+                .email(user.getEmail())
+                .userName(user.getUsername())
+                .build();
     }
 
-    public UserJwtResponse loginUser(String username, String password) {
+    public UserJwtResponse loginUser(final String username, final String password) {
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(
-                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
+        final User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
 
         if (!user.isEnabled()) {
-            throw new UserUnverifiedException("Please verify email before login");
+            log.error("User with username: {} is not verified", username);
+
+            throw new UserUnverifiedException(user.getEmail());
         }
 
-        Authentication authentication = authenticationManager.authenticate(
+        final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = jwtUtils.generateTokenFromUsername(user.getUsername());
+        final String jwt = jwtUtils.generateTokenFromUsername(user.getUsername());
+
+        log.info("User with username: {} is logged in", username);
 
         return UserJwtResponse.builder()
                 .email(user.getEmail())

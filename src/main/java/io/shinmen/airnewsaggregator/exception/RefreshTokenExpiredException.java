@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class RefreshTokenExpiredException extends AirNewsException {
-    public RefreshTokenExpiredException(String message) {
-        super(message);
+    public RefreshTokenExpiredException(final String token) {
+        super("Verification token: " + token + " has expired");
     }
 }

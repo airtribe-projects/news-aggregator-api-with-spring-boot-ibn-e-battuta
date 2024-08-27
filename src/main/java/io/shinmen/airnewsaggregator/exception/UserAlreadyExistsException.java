@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.CONFLICT)
 public class UserAlreadyExistsException extends AirNewsException {
-    public UserAlreadyExistsException(String message) {
-        super(message);
+    public UserAlreadyExistsException(final String user) {
+        super("User: " + user + " already exists");
     }
 }

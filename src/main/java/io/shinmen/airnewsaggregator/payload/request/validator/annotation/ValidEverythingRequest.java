@@ -6,17 +6,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.shinmen.airnewsaggregator.payload.request.validator.SourcesValidator;
-
+import io.shinmen.airnewsaggregator.payload.request.validator.ValidEverythingRequestValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = SourcesValidator.class)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
+@Constraint(validatedBy = ValidEverythingRequestValidator.class)
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Sources {
-    String message() default "One or more sources are invalid";
+public @interface ValidEverythingRequest {
+    String message() default "Required parameters are missing, the scope of search is too broad. "
+            + "Please set any of the following required parameters and try again: query, sources, domains.";
 
     Class<?>[] groups() default {};
 

@@ -10,7 +10,7 @@ public class NewsApiException extends RuntimeException {
     private final String code;
     private final HttpStatus httpStatus;
 
-    public NewsApiException(String code, String message, HttpStatus httpStatus) {
+    public NewsApiException(final String code, final String message, final HttpStatus httpStatus) {
         super(message);
         this.code = code;
         this.httpStatus = httpStatus;

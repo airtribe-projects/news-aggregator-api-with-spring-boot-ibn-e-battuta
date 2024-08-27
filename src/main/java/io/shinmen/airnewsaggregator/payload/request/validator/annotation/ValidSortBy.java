@@ -6,13 +6,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.shinmen.airnewsaggregator.payload.request.validator.SortByValidator;
+import io.shinmen.airnewsaggregator.payload.request.validator.ValidSortByValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = SortByValidator.class)
+@Constraint(validatedBy = ValidSortByValidator.class)
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSortBy {

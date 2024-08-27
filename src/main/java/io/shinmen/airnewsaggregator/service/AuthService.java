@@ -25,17 +25,21 @@ public class AuthService {
     private final EmailService emailService;
 
     @Transactional
-    public void registerUser(String username, String email, String password) {
-        UserResponse user = userService.createUser(username, email, password);
-        VerificationTokenResponse verificationToken = verificationTokenService
+    public void registerUser(final String username, final String email, final String password) {
+        final UserResponse user = userService.createUser(username, email, password);
+
+        final VerificationTokenResponse verificationToken = verificationTokenService
                 .createVerificationToken(user.getUserName());
+
         emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
     }
 
     @Transactional
-    public LoginResponse loginUser(String username, String password) {
-        UserJwtResponse user = userService.loginUser(username, password);
-        RefreshTokenResponse refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+    public LoginResponse loginUser(final String username, final String password) {
+        final UserJwtResponse user = userService.loginUser(username, password);
+
+        final RefreshTokenResponse refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+
         return LoginResponse.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -45,28 +49,31 @@ public class AuthService {
     }
 
     @Transactional
-    public JwtTokenRefreshResponse refreshToken(String token) {
+    public JwtTokenRefreshResponse refreshToken(final String token) {
         validateToken(token);
+
         return refreshTokenService.refreshToken(token);
     }
 
     @Transactional
-    public void verifyUser(String token) {
+    public void verifyUser(final String token) {
         validateToken(token);
+
         verificationTokenService.verifyUser(token);
     }
 
     @Transactional
-    public void reVerifyUser(String email) {
-        VerificationTokenResponse verificationToken = verificationTokenService.reVerifyUser(email);
+    public void reVerifyUser(final String email) {
+        final VerificationTokenResponse verificationToken = verificationTokenService.reVerifyUser(email);
+
         emailService.sendVerificationEmail(email, verificationToken.getToken());
     }
 
-    private void validateToken(String token) {
+    private void validateToken(final String token) {
         try {
             UUID.fromString(token);
         } catch (IllegalArgumentException ex) {
-            throw new InvalidTokenException("Invalid token: " + token + " provided");
+            throw new InvalidTokenException(token);
         }
     }
 }

@@ -8,26 +8,28 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@RequiredArgsConstructor
 public class ArticleRequest {
 
     @NotBlank
     @URL(message = "Invalid URL format")
-    private String url;
+    private final String url;
 
     @NotBlank
-    private String title;
+    private final String title;
 
     @NotBlank
-    private String source;
+    private final String source;
 
     @NotNull
     @ValidZonedDateTime(message = "Invalid 'publishedAt' date format. Use 'yyyy-MM-dd' or 'yyyy-MM-ddTHH:mm:ss'")
-    private String publishedAt;
+    private final String publishedAt;
 
     @NotBlank
-    private String author;
+    private final String author;
 }

@@ -23,10 +23,10 @@ public class JwtUtils {
     private String jwtSecret;
 
     @Value("${air-news-aggregator.app.jwtExpirationMs}")
-    private int jwtExpirationMs;
+    private long jwtExpirationMs;
 
-    public String generateTokenFromUsername(String username) {
-        long now = System.currentTimeMillis();
+    public String generateTokenFromUsername(final String username) {
+        final long now = System.currentTimeMillis();
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date(now))
@@ -40,7 +40,7 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String getUserNameFromJwtToken(String token) {
+    public String getUserNameFromJwtToken(final String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key())
@@ -54,7 +54,7 @@ public class JwtUtils {
         }
     }
 
-    public boolean validateJwtToken(String authToken) {
+    public boolean validateJwtToken(final String authToken) {
         try {
             Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken);
             return true;

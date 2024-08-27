@@ -1,5 +1,11 @@
 package io.shinmen.airnewsaggregator.exception;
 
+import static io.shinmen.airnewsaggregator.utility.Messages.MESSAGE_ACCESS_DENIED;
+import static io.shinmen.airnewsaggregator.utility.Messages.MESSAGE_AUTHENTICATION_FAILED;
+import static io.shinmen.airnewsaggregator.utility.Messages.MESSAGE_INVALID_USERNAME_PASSWORD;
+import static io.shinmen.airnewsaggregator.utility.Messages.MESSAGE_UNEXPECTED_ERROR;
+import static io.shinmen.airnewsaggregator.utility.Messages.MESSAGE_VALIDATION_ERROR;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +23,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import io.shinmen.airnewsaggregator.payload.response.ErrorResponse;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 
@@ -28,7 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AirNewsException.class)
-    public ResponseEntity<ErrorResponse> handleAirNewsExceptions(AirNewsException ex) {
+    public ResponseEntity<ErrorResponse> handleAirNewsExceptions(final AirNewsException ex) {
+
         log.error("Exception occurred: {}", ex.getMessage(), ex);
 
         HttpStatus status = extractResponseStatusFromAnnotation(ex);
@@ -37,11 +43,11 @@ public class GlobalExceptionHandler {
             status = HttpStatus.BAD_REQUEST;
         }
 
-        String error = ex.getMessage();
+        final String message = ex.getMessage();
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        final ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(status)
-                .message("Error: " + error)
+                .message("ERROR: " + message)
                 .timestamp(ZonedDateTime.now())
                 .build();
 
@@ -49,12 +55,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NewsApiException.class)
-    public ResponseEntity<ErrorResponse> handleNewsApiExceptions(NewsApiException ex) {
+    public ResponseEntity<ErrorResponse> handleNewsApiExceptions(final NewsApiException ex) {
         log.error("NewsApiException occurred: {}", ex.getMessage(), ex);
 
-        HttpStatus status = ex.getHttpStatus();
+        final HttpStatus status = ex.getHttpStatus();
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        final ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(status)
                 .message(ex.getCode().toUpperCase() + ": " + ex.getMessage())
                 .timestamp(ZonedDateTime.now())
@@ -64,8 +70,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        List<String> errors = new ArrayList<>();
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(final MethodArgumentNotValidException ex) {
+        final List<String> errors = new ArrayList<>();
 
         errors.addAll(ex.getBindingResult().getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage).toList());
@@ -73,9 +79,9 @@ public class GlobalExceptionHandler {
         errors.addAll(ex.getBindingResult().getGlobalErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage).toList());
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        final ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST)
-                .message("VALIDATION ERROR")
+                .message(MESSAGE_VALIDATION_ERROR)
                 .timestamp(ZonedDateTime.now())
                 .details(errors)
                 .build();
@@ -84,12 +90,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
-        List<String> errors = ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toList();
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(final ConstraintViolationException ex) {
+        final List<String> errors = ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toList();
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        final ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST)
-                .message("VALIDATION ERROR")
+                .message(MESSAGE_VALIDATION_ERROR)
                 .timestamp(ZonedDateTime.now())
                 .details(errors)
                 .build();
@@ -98,10 +104,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(final BadCredentialsException ex) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED)
-                .message("Invalid username or password")
+                .message(MESSAGE_INVALID_USERNAME_PASSWORD)
                 .timestamp(ZonedDateTime.now())
                 .build();
 
@@ -109,10 +115,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(final AccessDeniedException ex) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.FORBIDDEN)
-                .message("Access denied")
+                .message(MESSAGE_ACCESS_DENIED)
                 .timestamp(ZonedDateTime.now())
                 .build();
 
@@ -120,10 +126,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(final AuthenticationException ex) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED)
-                .message("Authentication failed")
+                .message(MESSAGE_AUTHENTICATION_FAILED)
                 .timestamp(ZonedDateTime.now())
                 .build();
 
@@ -131,12 +137,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleAllExceptions(final Exception ex) {
         log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        final ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .message("An unexpected error occurred")
+                .message(MESSAGE_UNEXPECTED_ERROR)
                 .timestamp(ZonedDateTime.now())
                 .details(Arrays.asList(
                         ex.getMessage(),
@@ -146,8 +152,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
-    private HttpStatus extractResponseStatusFromAnnotation(Exception ex) {
-        ResponseStatus responseStatus = ex.getClass().getAnnotation(ResponseStatus.class);
+    private HttpStatus extractResponseStatusFromAnnotation(final Exception ex) {
+        final ResponseStatus responseStatus = ex.getClass().getAnnotation(ResponseStatus.class);
 
         if (responseStatus != null) {
             return responseStatus.value();

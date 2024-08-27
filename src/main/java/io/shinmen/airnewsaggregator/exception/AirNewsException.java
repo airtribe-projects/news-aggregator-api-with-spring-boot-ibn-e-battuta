@@ -1,11 +1,11 @@
 package io.shinmen.airnewsaggregator.exception;
 
 public class AirNewsException extends RuntimeException {
-    public AirNewsException(String message) {
+    public AirNewsException(final String message) {
         super(message);
     }
 
-    public AirNewsException(String message, Throwable cause) {
+    public AirNewsException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

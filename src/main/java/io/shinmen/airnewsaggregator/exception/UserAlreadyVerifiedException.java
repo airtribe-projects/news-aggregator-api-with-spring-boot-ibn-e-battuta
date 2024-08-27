@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 public class UserAlreadyVerifiedException extends AirNewsException {
-    public UserAlreadyVerifiedException(String message) {
-        super(message);
+    public UserAlreadyVerifiedException(final String user) {
+        super("User: " + user + " is already verified");
     }
 }

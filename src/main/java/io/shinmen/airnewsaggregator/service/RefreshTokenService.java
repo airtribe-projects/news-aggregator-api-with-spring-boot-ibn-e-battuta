@@ -18,58 +18,70 @@ import io.shinmen.airnewsaggregator.payload.response.RefreshTokenResponse;
 import io.shinmen.airnewsaggregator.repository.RefreshTokenRepository;
 import io.shinmen.airnewsaggregator.repository.UserRepository;
 import io.shinmen.airnewsaggregator.security.JwtUtils;
-import io.shinmen.airnewsaggregator.service.helper.ServiceHelper;
-import lombok.RequiredArgsConstructor;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
 
     @Value("${air-news-aggregator.app.jwtRefreshExpirationMs}")
-    private Long refreshTokenDurationMs;
+    private long refreshTokenDurationMs;
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
 
     @Transactional
-    public RefreshTokenResponse createRefreshToken(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(
-                        ServiceHelper.getEntityNotFoundMessage("User", "username", username)));
+    public RefreshTokenResponse createRefreshToken(final String username) {
+        final User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
 
-        RefreshToken refreshToken = RefreshToken.builder()
+        final RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
                 .build();
 
         refreshTokenRepository.save(refreshToken);
-        return RefreshTokenResponse.builder().token(refreshToken.getToken()).build();
+
+        log.info("Refresh token created for user: {}", username);
+
+        return RefreshTokenResponse.builder()
+                .token(refreshToken.getToken())
+                .build();
     }
 
     @Transactional
     @Scheduled(fixedRate = 24 * 60 * 60 * 1000)
     public void deleteExpiredTokens() {
+        log.info("Deleting expired refresh tokens");
+
         refreshTokenRepository.deleteByExpiryDateBefore(Instant.now());
     }
 
     @Transactional
-    public JwtTokenRefreshResponse refreshToken(String token) {
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RefreshTokenNotFoundException(
-                        ServiceHelper.getEntityNotFoundMessage("Refresh token", "token", token)));
+    public JwtTokenRefreshResponse refreshToken(final String token) {
+        final RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RefreshTokenNotFoundException(token));
 
         if (refreshToken.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(refreshToken);
-            throw new RefreshTokenExpiredException(
-                    "Refresh token: " + token + " has expired. Please make a new login request");
+
+            log.error("Refresh token: {} has expired", token);
+
+            throw new RefreshTokenExpiredException(token);
         }
 
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+
         refreshTokenRepository.save(refreshToken);
 
-        String jwt = jwtUtils.generateTokenFromUsername(refreshToken.getUser().getUsername());
+        final String jwt = jwtUtils.generateTokenFromUsername(refreshToken.getUser().getUsername());
+
+        log.info("Refresh token: {} has been refreshed", token);
 
         return JwtTokenRefreshResponse.builder()
                 .accessToken(jwt)

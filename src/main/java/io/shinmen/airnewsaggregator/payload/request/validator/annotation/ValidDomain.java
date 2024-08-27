@@ -6,16 +6,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.shinmen.airnewsaggregator.payload.request.validator.DomainValidator;
+import io.shinmen.airnewsaggregator.payload.request.validator.ValidDomainValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = DomainValidator.class)
+@Constraint(validatedBy = ValidDomainValidator.class)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Domain {
+public @interface ValidDomain {
     String message() default "One or more sources are invalid";
 
     Class<?>[] groups() default {};

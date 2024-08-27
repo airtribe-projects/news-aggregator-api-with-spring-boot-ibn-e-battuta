@@ -11,26 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 @Builder
-public class EverythingSearchRequest {
+public class SearchRequest {
     private String query;
-    private String sources;
-    private String domains;
-    private String from;
-    private String to;
-    private String language;
-    private String sortBy;
-    private String pageSize;
     private String page;
+    private String pageSize;
 
     public String toCacheKey() {
         List<String> keys = Stream.of(
                 normalize(query).replace(" ", "-"),
-                normalize(sources),
-                normalize(domains),
-                normalize(from),
-                normalize(to),
-                normalize(language),
-                normalize(sortBy),
                 normalize(pageSize),
                 normalize(page))
                 .filter(s -> !s.isEmpty())

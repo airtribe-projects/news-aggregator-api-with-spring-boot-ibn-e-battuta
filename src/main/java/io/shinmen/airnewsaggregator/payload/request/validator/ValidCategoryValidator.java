@@ -6,10 +6,10 @@ import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidCa
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class CategoryValidator implements ConstraintValidator<ValidCategory, Category> {
+public class ValidCategoryValidator implements ConstraintValidator<ValidCategory, Category> {
 
     @Override
-    public boolean isValid(Category category, ConstraintValidatorContext context) {
+    public boolean isValid(final Category category, final ConstraintValidatorContext context) {
         if (category == null) {
             return true;
         }
