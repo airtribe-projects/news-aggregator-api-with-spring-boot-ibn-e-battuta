@@ -1,8 +1,8 @@
 package io.shinmen.airnewsaggregator.payload.request.validator;
 
 import io.shinmen.airnewsaggregator.payload.request.TopHeadLinesQueryRequest;
-import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidEverythingRequest;
 import io.shinmen.airnewsaggregator.payload.request.validator.annotation.ValidTopHeadlinesRequest;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
